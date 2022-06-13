@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\EmployeRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints\Date;
 
 #[ORM\Entity(repositoryClass: EmployeRepository::class)]
 class Employe extends User
@@ -27,7 +28,7 @@ class Employe extends User
     #[ORM\Column(type: 'string', length: 255)]
     private $telPerso;
 
-    #[ORM\Column(type: 'date')]
+    #[ORM\Column(type: 'string')]
     private $dateEmbauche;
 
 
@@ -92,7 +93,7 @@ class Employe extends User
         return $this;
     }
 
-    public function getDateEmbauche(): ?\Date
+    public function getDateEmbauche(): ?string
     {
         return $this->dateEmbauche;
     }

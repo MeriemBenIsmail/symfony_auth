@@ -2,26 +2,26 @@
 
 namespace App\Repository;
 
-use App\Entity\AdminRole;
+use App\Entity\UserRole;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<AdminRole>
+ * @extends ServiceEntityRepository<UserRole>
  *
- * @method AdminRole|null find($id, $lockMode = null, $lockVersion = null)
- * @method AdminRole|null findOneBy(array $criteria, array $orderBy = null)
- * @method AdminRole[]    findAll()
- * @method AdminRole[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method UserRole|null find($id, $lockMode = null, $lockVersion = null)
+ * @method UserRole|null findOneBy(array $criteria, array $orderBy = null)
+ * @method UserRole[]    findAll()
+ * @method UserRole[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class AdminRoleRepository extends ServiceEntityRepository
+class UserRoleRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, AdminRole::class);
+        parent::__construct($registry, UserRole::class);
     }
 
-    public function add(AdminRole $entity, bool $flush = false): void
+    public function add(UserRole $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
@@ -30,7 +30,7 @@ class AdminRoleRepository extends ServiceEntityRepository
         }
     }
 
-    public function remove(AdminRole $entity, bool $flush = false): void
+    public function remove(UserRole $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
 
@@ -40,7 +40,7 @@ class AdminRoleRepository extends ServiceEntityRepository
     }
 
 //    /**
-//     * @return AdminRole[] Returns an array of AdminRole objects
+//     * @return UserRole[] Returns an array of UserRole objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -54,7 +54,7 @@ class AdminRoleRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?AdminRole
+//    public function findOneBySomeField($value): ?UserRole
 //    {
 //        return $this->createQueryBuilder('a')
 //            ->andWhere('a.exampleField = :val')

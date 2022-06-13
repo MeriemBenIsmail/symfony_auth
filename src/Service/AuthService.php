@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-use App\Entity\Admin;
+use App\Entity\User;
 use App\Entity\Blacklisted;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -31,10 +31,10 @@ class AuthService
         return true;
     }
     public function  isAdmin($user)  {
-        $repo = $this->doctrine->getRepository(Admin::class);
+        $repo = $this->doctrine->getRepository(User::class);
 
         $admin = $repo->findOneBy(['email' => $user->getEmail()]);
-        if($admin) {
+        if($admin->isSuper()!==null) {
             return $admin;
         }
         return false;

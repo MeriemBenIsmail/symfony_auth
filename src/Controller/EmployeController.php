@@ -9,8 +9,9 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Constraints\Date;
 
-#[Route('/api/employe')]
+#[Route('/employe')]
 class EmployeController extends AbstractController
 {
     #[Route('/add', name: 'employe.add')]
@@ -32,7 +33,9 @@ class EmployeController extends AbstractController
         $employe->setAdresse($request->request->get('adresse'));
         $employe->setTelPerso($request->request->get('telPerso'));
         $employe->setTelPro($request->request->get('telPro'));
-        $employe->setDateEmbauche($request->request->get('dateEmbauche'));
+        $date= strtotime($request->request->get('dateEmbauche'));
+        $newdate=date("Y-m-d",$date);
+        $employe->setDateEmbauche($newdate);
 
         $entityManager->persist($employe);
         $entityManager->flush();

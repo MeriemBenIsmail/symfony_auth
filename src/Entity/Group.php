@@ -20,12 +20,12 @@ class Group
     #[ORM\Column(type: 'string')]
     private $name;
 
-    #[ORM\ManyToMany(targetEntity: Admin::class, inversedBy: 'groups')]
-    private $admins;
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'groups')]
+    private $users;
 
     public function __construct()
     {
-        $this->admins = new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -34,11 +34,12 @@ class Group
     }
 
     /**
-     * @return Collection<int, Admin>
+     * @return Collection<int, User>
      */
-    public function getAdmins(): Collection
+
+    public function getUsers(): Collection
     {
-        return $this->admins;
+        return $this->users;
     }
 
     public function getName(): string
@@ -51,18 +52,18 @@ class Group
         return $this;
     }
 
-    public function addAdmin(Admin $admin): self
+    public function addUser(User $user): self
     {
-        if (!$this->admins->contains($admin)) {
-            $this->admins[] = $admin;
+        if (!$this->users->contains($user)) {
+            $this->users[] = $user;
         }
 
         return $this;
     }
 
-    public function removeAdmin(Admin $admin): self
+    public function removeUser(User $user): self
     {
-        $this->admins->removeElement($admin);
+        $this->users->removeElement($user);
 
         return $this;
     }
