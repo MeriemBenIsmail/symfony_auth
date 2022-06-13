@@ -97,7 +97,12 @@ class Employe extends User
         return $this->dateEmbauche;
     }
 
+    public function setDateEmbauche(string $date): self
+    {
+        $this->dateEmbauche = $date;
 
+        return $this;
+    }
     public function getMatricule(): ?string
     {
         return $this->matricule;
