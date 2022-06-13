@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -11,7 +13,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[ORM\Table(name: '`user`')]
 #[ORM\InheritanceType('SINGLE_TABLE')]
 #[ORM\DiscriminatorColumn(name: "discr", type: "string")]
-#[ORM\DiscriminatorMap(["user" => User::class, "admin" => Admin::class, "employe" => Employe::class])]
+#[ORM\DiscriminatorMap(["user" => User::class,"employe" => Employe::class])]
 
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
@@ -23,11 +25,26 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 180, unique: true)]
     protected $email;
 
+    #[ORM\Column(type: 'boolean',nullable: true)]
+    private $super;
 
     private $roles = [];
 
     #[ORM\Column(type: 'string')]
     protected $password;
+
+    #[ORM\ManyToMany(targetEntity: UserRole::class, mappedBy: 'users')]
+    private $userRoles;
+
+    #[ORM\ManyToMany(targetEntity: Group::class, mappedBy: 'users')]
+    private $groups;
+
+    public function __construct()
+    {
+        $this->groups = new ArrayCollection();
+        $this->userRoles = new ArrayCollection();
+    }
+
 
     public function getId(): ?int
     {
@@ -52,6 +69,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return (string) $this->email;
     }
 
+
+    public function isSuper(): ?bool
+    {
+        return $this->super;
+    }
+
+    public function setSuper(bool $super): self
+    {
+        $this->super = $super;
+
+        return $this;
+    }
     /**
      * A visual identifier that represents this user.
      *
@@ -103,5 +132,59 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+
+    /**
+     * @return Collection<int, UserRole>
+     */
+    public function getUserRoles(): Collection
+    {
+        return $this->userRoles;
+    }
+
+    public function addUserRole(UserRole $userRole): self
+    {
+        if (!$this->userRoles->contains($userRole)) {
+            $this->userRoles[] = $userRole;
+            $userRole->addUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserRole(UserRole $userRole): self
+    {
+        if ($this->userRoles->removeElement($userRole)) {
+            $userRole->removeUser($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Group>
+     */
+    public function getGroups(): Collection
+    {
+        return $this->groups;
+    }
+
+    public function addGroup(Group $group): self
+    {
+        if (!$this->groups->contains($group)) {
+            $this->groups[] = $group;
+            $group->addUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGroup(Group $group): self
+    {
+        if ($this->groups->removeElement($group)) {
+            $group->removeUser($this);
+        }
+
+        return $this;
     }
 }
