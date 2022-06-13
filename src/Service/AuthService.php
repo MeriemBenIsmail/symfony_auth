@@ -30,13 +30,22 @@ class AuthService
         }
         return true;
     }
-    public function  isAdmin($user) : bool {
+    public function  isAdmin($user)  {
         $repo = $this->doctrine->getRepository(Admin::class);
 
         $admin = $repo->findOneBy(['email' => $user->getEmail()]);
-        dd($admin);
         if($admin) {
-            return true;
+            return $admin;
+        }
+        return false;
+
+    }
+    public function  isSuperAdmin($user) : bool {
+        $admin=$this->isAdmin($user);
+        if($admin){
+            if($admin->isIsSuper()) {
+                return true;
+            }
         }
         return false;
 

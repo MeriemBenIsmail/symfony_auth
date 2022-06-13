@@ -70,10 +70,15 @@ class UserController extends AbstractController
 
         if($service->isLoggedIn($request)) {
             $user = $this->getUser();
-            if($service->isAdmin($user))
-                return $this->json([
-                    'success' => 'hi admin',200
+            if($service->isAdmin($user)){
+                if($service->isSuperAdmin($user))
+                    return $this->json([
+                        'success' => 'hi super admin',200
+                    ]);
+                else return $this->json([
+                    'error' => 'logged in admin but not super admin',401
                 ]);
+            }
             else return $this->json([
                 'error' => 'logged in but not admin',401
             ]);
