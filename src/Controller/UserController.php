@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Blacklisted;
+use App\Service\AuthService;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -51,4 +52,39 @@ class UserController extends AbstractController
             'success' => 'you are logged in',200
         ]);
     }
+    #[Route('/api/hi', name: 'user.hi')]
+    public function sayHi(Request $request,AuthService $service): JsonResponse{
+
+        if($service->isLoggedIn($request)) {
+            return $this->json([
+                'success' => 'hii',200
+            ]);
+        }
+        return $this->json([
+            'error' => 'not logged in',401
+        ]);
+
+    }
+    #[Route('/api/admin', name: 'admin.test')]
+    public function sayAdmin(Request $request,AuthService $service): JsonResponse{
+
+        if($service->isLoggedIn($request)) {
+            $user = $this->getUser();
+            if($service->isAdmin($user))
+                return $this->json([
+                    'success' => 'hi admin',200
+                ]);
+            else return $this->json([
+                'error' => 'logged in but not admin',401
+            ]);
+        }
+        return $this->json([
+            'error' => 'not logged in',401
+        ]);
+
+    }
+
+
+
+
 }
