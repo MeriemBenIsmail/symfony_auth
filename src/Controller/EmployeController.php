@@ -11,9 +11,38 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Constraints\Date;
 
-#[Route('/employe')]
+#[Route('/employes')]
 class EmployeController extends AbstractController
 {
+    #[Route('/', name: 'employes.all')]
+    public function getEmployes(ManagerRegistry $doctrine)
+    {
+        $repo = $doctrine->getRepository(Employe::class);
+        $employes = $repo->findAll();
+        return $this->json([
+            'employes' => $employes,200
+        ]);
+    }
+
+    #[Route('/{matricule}', name: 'employes.matricule')]
+    public function getByMatricule(ManagerRegistry $doctrine,$matricule): JsonResponse
+    {
+
+        $repo = $doctrine->getRepository(Employe::class);
+        $employe = $repo->findOneBy(['matricule' => $matricule]);
+        return $this->json([
+            'employe' => $employe,200
+        ]);
+    }
+
+    #[Route('/{id<\d+>}', name: 'employes.detail')]
+    public function detail(Employe $employe = null): JsonResponse
+    {
+        return $this->json([
+            'employe' => $employe,200
+        ]);
+    }
+
     #[Route('/add', name: 'employe.add')]
     public function addEmploye(ManagerRegistry $doctrine,Request $request,UserPasswordHasherInterface $passwordHasher): JsonResponse
     {
@@ -36,6 +65,21 @@ class EmployeController extends AbstractController
         $date= strtotime($request->request->get('dateEmbauche'));
         $newdate=date("Y-m-d",$date);
         $employe->setDateEmbauche($newdate);
+
+        $entityManager->persist($employe);
+        $entityManager->flush();
+        return $this->json([
+            'success' => $employe,200
+        ]);
+    }
+
+    #[Route('/update/{matricule}', name: 'employes.update')]
+    public function updateEmploye(ManagerRegistry $doctrine,Request $request,$matricule): JsonResponse
+    {
+        dd($request->request->all()['nom']);
+        $entityManager = $doctrine->getManager();
+        $repo = $doctrine->getRepository(Employe::class);
+        $employe = $repo->findOneBy(['matricule' => $matricule]);
 
         $entityManager->persist($employe);
         $entityManager->flush();
