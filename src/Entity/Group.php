@@ -23,9 +23,13 @@ class Group
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'groups')]
     private $users;
 
+    #[ORM\ManyToMany(targetEntity: UserRole::class)]
+    private $groupRoles;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
+        $this->groupRoles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -42,11 +46,19 @@ class Group
         return $this->users;
     }
 
+    public function emptyUsers(): self
+    {
+        $this->users = new ArrayCollection();
+        return $this;
+
+    }
+
     public function getName(): string
     {
         return $this->name;
     }
-    public function setName(string $name) : self
+
+    public function setName(string $name): self
     {
         $this->name = $name;
         return $this;
@@ -64,6 +76,37 @@ class Group
     public function removeUser(User $user): self
     {
         $this->users->removeElement($user);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserRole>
+     */
+    public function getGroupRoles(): Collection
+    {
+        return $this->groupRoles;
+    }
+
+    public function emptyGroupRoles(): self
+    {
+        $this->groupRoles = new ArrayCollection();
+        return $this;
+
+    }
+
+    public function addGroupRole(UserRole $groupRole): self
+    {
+        if (!$this->groupRoles->contains($groupRole)) {
+            $this->groupRoles[] = $groupRole;
+        }
+
+        return $this;
+    }
+
+    public function removeGroupRole(UserRole $groupRole): self
+    {
+        $this->groupRoles->removeElement($groupRole);
 
         return $this;
     }
