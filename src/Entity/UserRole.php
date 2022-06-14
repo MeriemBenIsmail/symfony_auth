@@ -22,6 +22,7 @@ class  UserRole
     private $users;
 
     #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'userRoles')]
+    #[ORM\JoinColumn(onDelete:"CASCADE")]
     private $userRole;
 
     #[ORM\OneToMany(mappedBy: 'userRole', targetEntity: self::class)]
@@ -94,6 +95,12 @@ class  UserRole
     public function getUserRoles(): Collection
     {
         return $this->userRoles;
+    }
+    public function  emptyUserRoles():self
+    {
+        $this->userRoles=new ArrayCollection();
+        return $this;
+
     }
 
     public function addUserRole(self $userRole): self
