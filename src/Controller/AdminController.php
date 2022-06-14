@@ -24,6 +24,7 @@ class AdminController extends AbstractController
     public function addAdmin(ManagerRegistry $doctrine,Request $request,UserPasswordHasherInterface $passwordHasher,AuthService $authService): JsonResponse
     {
         $user = $this->getUser();
+
         if($authService->hasRole($user,'admin','create_admin')){
             $entityManager = $doctrine->getManager();
             $admin = new User();
@@ -128,8 +129,3 @@ class AdminController extends AbstractController
 
 
 }
-
-
-
-
-

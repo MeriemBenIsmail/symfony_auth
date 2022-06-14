@@ -33,7 +33,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string')]
     protected $password;
 
-    #[ORM\ManyToMany(targetEntity: UserRole::class, mappedBy: 'users')]
+    #[ORM\ManyToMany(targetEntity: UserRole::class)]
     private $userRoles;
 
     #[ORM\ManyToMany(targetEntity: Group::class, mappedBy: 'users')]

@@ -3,13 +3,10 @@
 namespace App\Controller;
 
 
-use App\Entity\Admin;
 use App\Entity\Group;
 use App\Entity\User;
 use App\Entity\UserRole;
 use App\Form\GroupType;
-use App\Form\UserRoleType;
-use App\Service\ResponseService;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,35 +18,7 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 #[Route('/groups')]
 class GroupController extends AbstractController
 {
-
-    #[Route('/', name: 'group.list')]
-    public function getAll(ManagerRegistry $doctrine): JsonResponse
-    {
-        $groupRepo = $doctrine->getRepository(Group::class);
-        $groups = $groupRepo->findAll();
-        return $this->json($groups, Response::HTTP_OK, [], [
-            ObjectNormalizer::SKIP_NULL_VALUES => true,
-            ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
-                return $object->getId();
-            }
-        ]);
-    }
-
-    #[Route('/{id</d+>}', name: 'group.get')]
-    public function getGroup(ManagerRegistry $doctrine, Group $group = null): JsonResponse
-    {
-        if ($group) {
-            return $this->json($group, Response::HTTP_OK, [], [
-                ObjectNormalizer::SKIP_NULL_VALUES => true,
-                ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
-                    return $object->getId();
-                }
-            ]);
-        } else {
-            return new JsonResponse(["message" => "error"]);
-        }
-    }
-
+    #[Route('/add', name: 'group.add')]
     public function addGroup(ManagerRegistry $doctrine, Request $request): JsonResponse
     {
         $entityManager = $doctrine->getManager();
@@ -68,25 +37,28 @@ class GroupController extends AbstractController
             $groupRolesArray = explode(",", $request->request->get("groupRoles"));
             foreach ($groupRolesArray as $groupRole) {
                 $groupRol = $userRoleRepo->find($groupRole);
-                $group->addUser($groupRol);
+                $group->addGroupRole($groupRol);
             }
         }
         $entityManager->persist($group);
         $entityManager->flush();
-        return $this->json([
-            'success' => $group, 200
+        return $this->json($group, Response::HTTP_OK, [], [
+            ObjectNormalizer::SKIP_NULL_VALUES => true,
+            ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                return $object->getId();
+            }
         ]);
     }
 
-    #[Route('/addTo', name: 'group.addAdmin')]
+    #[Route('/addTo', name: 'group.addUser')]
     public function addToGroup(ManagerRegistry $doctrine, Request $request): JsonResponse
     {
         $entityManager = $doctrine->getManager();
-        $adminRepo = $doctrine->getRepository(Admin::class);
+        $userRepo = $doctrine->getRepository(User::class);
         $groupRepo = $doctrine->getRepository(Group::class);
-        $admin = $adminRepo->find($request->request->get("admin"));
+        $user = $userRepo->find($request->request->get("user"));
         $group = $groupRepo->find($request->request->get("group"));
-        $group->addAdmin($admin);
+        $group->addUser($user);
         $entityManager->persist($group);
         $entityManager->flush();
         return $this->json($group, Response::HTTP_OK, [], [
@@ -97,15 +69,15 @@ class GroupController extends AbstractController
         ]);
     }
 
-    #[Route('/removeFrom', name: 'group.removeAdmin')]
+    #[Route('/removeFrom', name: 'group.removeUser')]
     public function removeFromGroup(ManagerRegistry $doctrine, Request $request): JsonResponse
     {
         $entityManager = $doctrine->getManager();
-        $adminRepo = $doctrine->getRepository(Admin::class);
+        $userRepo = $doctrine->getRepository(User::class);
         $groupRepo = $doctrine->getRepository(Group::class);
-        $admin = $adminRepo->find($request->request->get("admin"));
+        $user = $userRepo->find($request->request->get("user"));
         $group = $groupRepo->find($request->request->get("group"));
-        $group->removeUser($admin);
+        $group->removeUser($user);
         $entityManager->persist($group);
         $entityManager->flush();
         return $this->json($group, Response::HTTP_OK, [], [
@@ -116,7 +88,7 @@ class GroupController extends AbstractController
         ]);
     }
 
-    #[Route('/updateGroup/{id<d+>}', name: 'group.update')]
+    #[Route('/updateGroup/{id<\d+>}', name: 'group.update')]
     public function updateGroup(Group $group = null, ManagerRegistry $doctrine, Request $request): JsonResponse
     {
         if ($group) {
@@ -139,7 +111,7 @@ class GroupController extends AbstractController
                 $group->emptyGroupRoles();
                 foreach ($groupRolesArray as $groupRole) {
                     $groupRol = $userRoleRepo->find($groupRole);
-                    $group->addUser($groupRol);
+                    $group->addGroupRole($groupRol);
                 }
             }
             if ($form->isSubmitted()) {
@@ -161,5 +133,31 @@ class GroupController extends AbstractController
         }
     }
 
+    #[Route('/', name: 'group.list')]
+    public function getAll(ManagerRegistry $doctrine): JsonResponse
+    {
+        $groupRepo = $doctrine->getRepository(Group::class);
+        $groups = $groupRepo->findAll();
+        return $this->json($groups, Response::HTTP_OK, [], [
+            ObjectNormalizer::SKIP_NULL_VALUES => true,
+            ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                return $object->getId();
+            }
+        ]);
+    }
 
+    #[Route('/{id<\d+>}', name: 'group.get')]
+    public function getGroup(ManagerRegistry $doctrine, Group $group = null): JsonResponse
+    {
+        if ($group) {
+            return $this->json($group, Response::HTTP_OK, [], [
+                ObjectNormalizer::SKIP_NULL_VALUES => true,
+                ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                    return $object->getId();
+                }
+            ]);
+        } else {
+            return new JsonResponse(["message" => "error"]);
+        }
+    }
 }
