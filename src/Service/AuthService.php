@@ -43,7 +43,7 @@ class AuthService
     public function  isSuperAdmin($user) : bool {
         $admin=$this->isAdmin($user);
         if($admin){
-            if($admin->isIsSuper()) {
+            if($admin->isSuper()) {
                 return true;
             }
         }
