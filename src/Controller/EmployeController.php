@@ -3,17 +3,86 @@
 namespace App\Controller;
 
 use App\Entity\Employe;
+use App\Entity\Group;
+use App\Form\EmployeType;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Validator\Constraints\Date;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+
 
 #[Route('/employes')]
 class EmployeController extends AbstractController
 {
+    #[Route('/add', name: 'employe.add')]
+    public function addEmploye(ManagerRegistry $doctrine,Request $request,UserPasswordHasherInterface $passwordHasher): JsonResponse
+    {
+        $entityManager = $doctrine->getManager();
+        $employe = new Employe();
+        $employe->setEmail($request->request->get('email'));
+        // hashing the password
+        $hashedPassword = $passwordHasher->hashPassword(
+            $employe,
+            $request->request->get('password')
+        );
+
+        $employe->setPassword($hashedPassword);
+        $employe->setMatricule($request->request->get('matricule'));
+        $employe->setNom($request->request->get('nom'));
+        $employe->setPrenom($request->request->get('prenom'));
+        $employe->setAdresse($request->request->get('adresse'));
+        $employe->setTelPerso($request->request->get('telPerso'));
+        $employe->setTelPro($request->request->get('telPro'));
+        $date= strtotime($request->request->get('dateEmbauche'));
+        $newdate=date("Y-m-d",$date);
+        $employe->setDateEmbauche($newdate);
+        $groupRepo = $doctrine->getRepository(Group::class);
+        $group = $groupRepo->find($request->request->get("group"));
+        $group->addUser($employe);
+        $entityManager->persist($group);
+        $entityManager->persist($employe);
+        $entityManager->flush();
+        return $this->json($group, Response::HTTP_OK, [], [
+            ObjectNormalizer::SKIP_NULL_VALUES => true,
+            ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                return $object->getId();
+            }
+        ]);
+    }
+
+    #[Route('/update/{matricule}', name: 'employes.update')]
+    public function updateRole(Employe $employe = null, Request $request, ManagerRegistry $doctrine): Response
+    {
+
+        $entityManager = $doctrine->getManager();
+        //$repo = $doctrine->getRepository(Employe::class);
+        if ($employe) {
+            $form = $this->createForm(EmployeType::class, $employe);
+            $form->handleRequest($request);
+            $form->submit($request->request->all(), false);
+
+            if ($form->isSubmitted()) {
+                $entityManager->persist($employe);
+                $entityManager->flush();
+            }
+
+            return $this->json([
+                "message" => "success",
+                "data" => $employe], 200
+            );
+        }
+        return $this->json([
+            "message" => "error",
+            "data" => "No such employe"], 200
+        );
+
+
+    }
+
     #[Route('/', name: 'employes.all')]
     public function getEmployes(ManagerRegistry $doctrine)
     {
@@ -43,49 +112,6 @@ class EmployeController extends AbstractController
         ]);
     }
 
-    #[Route('/add', name: 'employe.add')]
-    public function addEmploye(ManagerRegistry $doctrine,Request $request,UserPasswordHasherInterface $passwordHasher): JsonResponse
-    {
-        $entityManager = $doctrine->getManager();
-        $employe = new Employe();
-        $employe->setEmail($request->request->get('email'));
-        // hashing the password
-        $hashedPassword = $passwordHasher->hashPassword(
-            $employe,
-            $request->request->get('password')
-        );
 
-        $employe->setPassword($hashedPassword);
-        $employe->setMatricule($request->request->get('matricule'));
-        $employe->setNom($request->request->get('nom'));
-        $employe->setPrenom($request->request->get('prenom'));
-        $employe->setAdresse($request->request->get('adresse'));
-        $employe->setTelPerso($request->request->get('telPerso'));
-        $employe->setTelPro($request->request->get('telPro'));
-        $date= strtotime($request->request->get('dateEmbauche'));
-        $newdate=date("Y-m-d",$date);
-        $employe->setDateEmbauche($newdate);
-
-        $entityManager->persist($employe);
-        $entityManager->flush();
-        return $this->json([
-            'success' => $employe,200
-        ]);
-    }
-
-    #[Route('/update/{matricule}', name: 'employes.update')]
-    public function updateEmploye(ManagerRegistry $doctrine,Request $request,$matricule): JsonResponse
-    {
-        dd($request->request->all()['nom']);
-        $entityManager = $doctrine->getManager();
-        $repo = $doctrine->getRepository(Employe::class);
-        $employe = $repo->findOneBy(['matricule' => $matricule]);
-
-        $entityManager->persist($employe);
-        $entityManager->flush();
-        return $this->json([
-            'success' => $employe,200
-        ]);
-    }
 
 }

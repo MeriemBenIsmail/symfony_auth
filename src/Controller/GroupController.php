@@ -18,9 +18,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
-#[Route('/api/groups')]
+#[Route('/groups')]
 class GroupController extends AbstractController
 {
+
     #[Route('/', name: 'group.list')]
     public function getAll(ManagerRegistry $doctrine): JsonResponse
     {
@@ -49,7 +50,6 @@ class GroupController extends AbstractController
         }
     }
 
-    #[Route('/add', name: 'group.add')]
     public function addGroup(ManagerRegistry $doctrine, Request $request): JsonResponse
     {
         $entityManager = $doctrine->getManager();
@@ -160,5 +160,6 @@ class GroupController extends AbstractController
 
         }
     }
+
 
 }
