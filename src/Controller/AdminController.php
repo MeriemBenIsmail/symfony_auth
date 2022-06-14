@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Group;
 use App\Entity\User;
+use App\Entity\UserRole;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -29,14 +30,27 @@ class AdminController extends AbstractController
             $admin,
             $request->request->get('password')
         );
-        $groupRepo = $doctrine->getRepository(Group::class);
-        $group = $groupRepo->find($request->request->get("group"));
-        $group->addUser($admin);
+        if ($request->request->get("groups")) {
+            $groupRepo = $doctrine->getRepository(Group::class);
+            $groupsArray = explode(",", $request->request->get("groups"));
+            foreach ($groupsArray as $group) {
+                $grp = $groupRepo->find($group);
+                $grp->addUser($admin);
+                $entityManager->persist($grp);
+            }
+        }
+        if ($request->request->get("roles")) {
+            $userRoleRepo = $doctrine->getRepository(UserRole::class);
+            $userRolesArray = explode(",", $request->request->get("roles"));
+            foreach ($userRolesArray as $userRole) {
+                $userRol = $userRoleRepo->find($userRole);
+                $admin->addUserRole($userRol);
+            }
+        }
         $admin->setPassword($hashedPassword);
-        $entityManager->persist($group);
         $entityManager->persist($admin);
         $entityManager->flush();
-        return $this->json($group, Response::HTTP_OK, [], [
+        return $this->json($admin, Response::HTTP_OK, [], [
             ObjectNormalizer::SKIP_NULL_VALUES => true,
             ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
                 return $object->getId();

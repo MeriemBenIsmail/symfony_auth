@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 
-#[Route('/api/roles')]
+#[Route('/roles')]
 class RoleController extends AbstractController
 {
     #[Route('/add', name: 'roles.add')]

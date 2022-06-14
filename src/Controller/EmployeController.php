@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Employe;
 use App\Entity\Group;
+use App\Entity\UserRole;
 use App\Form\EmployeType;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -40,13 +41,26 @@ class EmployeController extends AbstractController
         $date= strtotime($request->request->get('dateEmbauche'));
         $newdate=date("Y-m-d",$date);
         $employe->setDateEmbauche($newdate);
-        $groupRepo = $doctrine->getRepository(Group::class);
-        $group = $groupRepo->find($request->request->get("group"));
-        $group->addUser($employe);
-        $entityManager->persist($group);
+        if ($request->request->get("groups")) {
+            $groupRepo = $doctrine->getRepository(Group::class);
+            $groupsArray = explode(",", $request->request->get("groups"));
+            foreach ($groupsArray as $group) {
+                $grp = $groupRepo->find($group);
+                $grp->addUser($employe);
+                $entityManager->persist($grp);
+            }
+        }
+        if ($request->request->get("roles")) {
+            $userRoleRepo = $doctrine->getRepository(UserRole::class);
+            $userRolesArray = explode(",", $request->request->get("roles"));
+            foreach ($userRolesArray as $userRole) {
+                $userRol = $userRoleRepo->find($userRole);
+                $employe->addUserRole($userRol);
+            }
+        }
         $entityManager->persist($employe);
         $entityManager->flush();
-        return $this->json($group, Response::HTTP_OK, [], [
+        return $this->json($employe, Response::HTTP_OK, [], [
             ObjectNormalizer::SKIP_NULL_VALUES => true,
             ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
                 return $object->getId();
