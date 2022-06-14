@@ -18,6 +18,7 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 #[Route('/groups')]
 class GroupController extends AbstractController
 {
+    #[Route('/add', name: 'group.add')]
     public function addGroup(ManagerRegistry $doctrine, Request $request): JsonResponse
     {
         $entityManager = $doctrine->getManager();
@@ -36,13 +37,16 @@ class GroupController extends AbstractController
             $groupRolesArray = explode(",", $request->request->get("groupRoles"));
             foreach ($groupRolesArray as $groupRole) {
                 $groupRol = $userRoleRepo->find($groupRole);
-                $group->addUser($groupRol);
+                $group->addGroupRole($groupRol);
             }
         }
         $entityManager->persist($group);
         $entityManager->flush();
-        return $this->json([
-            'success' => $group, 200
+        return $this->json($group, Response::HTTP_OK, [], [
+            ObjectNormalizer::SKIP_NULL_VALUES => true,
+            ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                return $object->getId();
+            }
         ]);
     }
 
@@ -107,7 +111,7 @@ class GroupController extends AbstractController
                 $group->emptyGroupRoles();
                 foreach ($groupRolesArray as $groupRole) {
                     $groupRol = $userRoleRepo->find($groupRole);
-                    $group->addUser($groupRol);
+                    $group->addGroupRole($groupRol);
                 }
             }
             if ($form->isSubmitted()) {
