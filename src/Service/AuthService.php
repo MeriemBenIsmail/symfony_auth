@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Controller\RoleController;
 use App\Entity\User;
 use App\Entity\Blacklisted;
 use Doctrine\Persistence\ManagerRegistry;
@@ -11,10 +12,13 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 class AuthService
 {
     private $doctrine;
-    public function __construct(ManagerRegistry $doctrine){
+    private $roleController;
+    public function __construct(ManagerRegistry $doctrine,RoleController $roleController){
         $this->doctrine = $doctrine;
+        $this->roleController=$roleController;
     }
-    public function isLoggedIn($request): bool
+    //check if token passed is valid or not ( logout case )
+    public function  isLoggedIn($request): bool
 
     {
 
@@ -49,6 +53,26 @@ class AuthService
         }
         return false;
 
+    }
+    public function hasRole($user,$roleEntity,$rolePerm) : bool {
+
+        if($this->isSuperAdmin($user)){
+            return true;
+        }
+        $role1= $this->roleController->getRoleByName($roleEntity,$this->doctrine);
+
+        $groups = $user->getGroups();
+        $rolesUnion = array_merge($groups->getGroupRoles(),$user->getUserRoles());
+
+        if(in_array($role1,$rolesUnion)) {
+            return true;
+        }
+        $role2= $this->roleController->getRoleByName($rolePerm,$this->doctrine);
+
+        if(in_array($role2,$rolesUnion)) {
+            return true;
+        }
+        return false;
     }
 
 }
