@@ -14,10 +14,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
-#[Route('/api/groups')]
+#[Route('/groups')]
 class GroupController extends AbstractController
 {
-    #[Route('/add', name: 'group.add')]
+    #[Route('/add', name: 'groups.add')]
     public function addGroup(ManagerRegistry $doctrine, Request $request): JsonResponse
     {
         $entityManager = $doctrine->getManager();
@@ -29,22 +29,5 @@ class GroupController extends AbstractController
             'success' => $group,200
         ]);
     }
-    #[Route('/addTo', name: 'group.addAdmin')]
-    public function addToGroup(ManagerRegistry $doctrine, Request $request): JsonResponse
-    {
-        $entityManager = $doctrine->getManager();
-        $adminRepo=$doctrine->getRepository(Admin::class);
-        $groupRepo=$doctrine->getRepository(Group::class);
-        $admin=$adminRepo->find($request->request->get("admin"));
-        $group=$groupRepo->find($request->request->get("group"));
-        $group->addAdmin($admin);
-        $entityManager->persist($group);
-        $entityManager->flush();
-        return $this->json($group, Response::HTTP_OK, [], [
-            ObjectNormalizer::SKIP_NULL_VALUES => true,
-            ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
-                return $object->getId();
-            }
-        ]);
-    }
+
 }
