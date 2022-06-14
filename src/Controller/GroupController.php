@@ -8,8 +8,6 @@ use App\Entity\Group;
 use App\Entity\User;
 use App\Entity\UserRole;
 use App\Form\GroupType;
-use App\Form\UserRoleType;
-use App\Service\ResponseService;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,33 +19,6 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 #[Route('/api/groups')]
 class GroupController extends AbstractController
 {
-    #[Route('/', name: 'group.list')]
-    public function getAll(ManagerRegistry $doctrine): JsonResponse
-    {
-        $groupRepo = $doctrine->getRepository(Group::class);
-        $groups = $groupRepo->findAll();
-        return $this->json($groups, Response::HTTP_OK, [], [
-            ObjectNormalizer::SKIP_NULL_VALUES => true,
-            ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
-                return $object->getId();
-            }
-        ]);
-    }
-
-    #[Route('/{id</d+>}', name: 'group.get')]
-    public function getGroup(ManagerRegistry $doctrine, Group $group = null): JsonResponse
-    {
-        if ($group) {
-            return $this->json($group, Response::HTTP_OK, [], [
-                ObjectNormalizer::SKIP_NULL_VALUES => true,
-                ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
-                    return $object->getId();
-                }
-            ]);
-        } else {
-            return new JsonResponse(["message" => "error"]);
-        }
-    }
 
     #[Route('/add', name: 'group.add')]
     public function addGroup(ManagerRegistry $doctrine, Request $request): JsonResponse
@@ -116,7 +87,7 @@ class GroupController extends AbstractController
         ]);
     }
 
-    #[Route('/updateGroup/{id<d+>}', name: 'group.update')]
+    #[Route('/updateGroup/{id<\d+>}', name: 'group.update')]
     public function updateGroup(Group $group = null, ManagerRegistry $doctrine, Request $request): JsonResponse
     {
         if ($group) {
@@ -161,4 +132,31 @@ class GroupController extends AbstractController
         }
     }
 
+    #[Route('/', name: 'group.list')]
+    public function getAll(ManagerRegistry $doctrine): JsonResponse
+    {
+        $groupRepo = $doctrine->getRepository(Group::class);
+        $groups = $groupRepo->findAll();
+        return $this->json($groups, Response::HTTP_OK, [], [
+            ObjectNormalizer::SKIP_NULL_VALUES => true,
+            ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                return $object->getId();
+            }
+        ]);
+    }
+
+    #[Route('/{id<\d+>}', name: 'group.get')]
+    public function getGroup(ManagerRegistry $doctrine, Group $group = null): JsonResponse
+    {
+        if ($group) {
+            return $this->json($group, Response::HTTP_OK, [], [
+                ObjectNormalizer::SKIP_NULL_VALUES => true,
+                ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                    return $object->getId();
+                }
+            ]);
+        } else {
+            return new JsonResponse(["message" => "error"]);
+        }
+    }
 }

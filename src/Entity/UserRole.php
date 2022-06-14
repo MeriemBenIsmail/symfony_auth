@@ -18,8 +18,6 @@ class  UserRole
     #[ORM\Column(type: 'string', length: 255)]
     private $name;
 
-    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'userRoles')]
-    private $users;
 
     #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'userRoles')]
     #[ORM\JoinColumn(onDelete:"CASCADE")]
@@ -31,7 +29,6 @@ class  UserRole
 
     public function __construct()
     {
-        $this->users = new ArrayCollection();
         $this->userRoles = new ArrayCollection();
     }
 
@@ -53,29 +50,7 @@ class  UserRole
         return $this;
     }
 
-    /**
-     * @return Collection<int, User>
-     */
-    public function getUsers(): Collection
-    {
-        return $this->users;
-    }
 
-    public function addUser(User $user): self
-    {
-        if (!$this->users->contains($user)) {
-            $this->users[] = $user;
-        }
-
-        return $this;
-    }
-
-    public function removeUser(User $user): self
-    {
-        $this->users->removeElement($user);
-
-        return $this;
-    }
 
     public function getUserRole(): ?self
     {

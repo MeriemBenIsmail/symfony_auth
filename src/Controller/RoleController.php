@@ -45,6 +45,38 @@ class RoleController extends AbstractController
         ]);
     }
 
+    #[Route('/update/{id<\d+>}', name: 'roles.update')]
+    public function updateRole(UserRole $userRole = null, Request $request, ManagerRegistry $doctrine): Response
+    {
+        $entityManager = $doctrine->getManager();
+        $userRoleRepo = $doctrine->getRepository(UserRole::class);
+        if ($userRole) {
+            $form = $this->createForm(UserRoleType::class, $userRole);
+            $form->handleRequest($request);
+            $form->submit($request->request->all(), false);
+            if ($request->request->get("userRoles")) {
+                $roleArray = explode(",", $request->request->get("userRoles"));
+                $userRole->emptyUserRoles();
+                foreach ($roleArray as $role) {
+                    $rol = $userRoleRepo->find($role);
+                    $userRole->addUserRole($rol);
+                }
+            }
+            if ($form->isSubmitted()) {
+                $entityManager->persist($userRole);
+                $entityManager->flush();
+            }
+            return $this->json($userRole, Response::HTTP_OK, [], [
+                ObjectNormalizer::SKIP_NULL_VALUES => true,
+                ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                    return $object->getId();
+                }
+            ]);
+        }
+        return new JsonResponse([
+            "message" => "error",
+            "data" => "No such userRole"], 200);
+    }
 
     #[Route('/', name: 'roles.list')]
     public function getRoles(Request $request, ManagerRegistry $doctrine): Response
@@ -59,8 +91,7 @@ class RoleController extends AbstractController
         ]);
     }
 
-
-    #[Route('/{id</d+>}', name: 'roles.get')]
+    #[Route('/{id<\d+>}', name: 'roles.get')]
     public function getRole(int $id, ManagerRegistry $doctrine): Response
     {
         $userRoleRepo = $doctrine->getRepository(UserRole::class);
@@ -94,43 +125,4 @@ class RoleController extends AbstractController
         }
 
     }
-
-    #[Route('/update/{id}', name: 'roles.update')]
-    public function updateRole(UserRole $userRole = null, Request $request, ManagerRegistry $doctrine): Response
-    {
-
-        $entityManager = $doctrine->getManager();
-        $userRoleRepo = $doctrine->getRepository(UserRole::class);
-        if ($userRole) {
-            $form = $this->createForm(UserRoleType::class, $userRole);
-            $form->handleRequest($request);
-            $form->submit($request->request->all(), false);
-            if ($request->request->get("userRoles")) {
-                $roleArray = explode(",", $request->request->get("userRoles"));
-                $userRole->emptyUserRoles();
-                foreach ($roleArray as $role) {
-                    $rol = $userRoleRepo->find($role);
-                    $userRole->addUserRole($rol);
-                }
-            }
-            if ($form->isSubmitted()) {
-                $entityManager->persist($userRole);
-                $entityManager->flush();
-            }
-
-            return $this->json($userRole, Response::HTTP_OK, [], [
-                ObjectNormalizer::SKIP_NULL_VALUES => true,
-                ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
-                    return $object->getId();
-                }
-            ]);
-        }
-        return new JsonResponse([
-            "message" => "error",
-            "data" => "No such userRole"], 200);
-
-
-    }
-
-
 }
