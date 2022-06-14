@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Group;
 use App\Entity\User;
 use App\Entity\UserRole;
+use App\Form\AdminType;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -57,6 +58,34 @@ class AdminController extends AbstractController
             }
         ]);
     }
+    #[Route('/update/{id}', name: 'employes.update')]
+    public function updateRole(User $user = null, Request $request, ManagerRegistry $doctrine): Response
+    {
+
+        $entityManager = $doctrine->getManager();
+        if ($user) {
+            $form = $this->createForm(AdminType::class, $user);
+            $form->handleRequest($request);
+            $form->submit($request->request->all(), false);
+
+            if ($form->isSubmitted()) {
+                $entityManager->persist($user);
+                $entityManager->flush();
+            }
+
+            return $this->json([
+                "message" => "success",
+                "data" => $user], 200
+            );
+        }
+        return $this->json([
+            "message" => "error",
+            "data" => "No such user"], 200
+        );
+
+
+    }
+
 
     #[Route('/', name: 'admins.all')]
     public function getAdmins(ManagerRegistry $doctrine)
