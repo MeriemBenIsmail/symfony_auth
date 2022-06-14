@@ -24,7 +24,8 @@ class AdminController extends AbstractController
     public function addAdmin(ManagerRegistry $doctrine,Request $request,UserPasswordHasherInterface $passwordHasher,AuthService $authService): JsonResponse
     {
         $user = $this->getUser();
-        if($authService->isSuperAdmin($user)){
+
+        if($authService->hasRole($user,'admin','create_admin')){
             $entityManager = $doctrine->getManager();
             $admin = new User();
             $admin->setEmail($request->request->get('email'));
@@ -62,7 +63,7 @@ class AdminController extends AbstractController
             ]);
 
         }
-        return $this->json(['error' => 'you are not logged in as super admin'],401);
+        return $this->json(['error' => "you don't have access to this resource"],401);
 
 
     }
@@ -70,7 +71,6 @@ class AdminController extends AbstractController
     #[Route('/update/{id}', name: 'employes.update')]
     public function updateRole(User $user = null, Request $request, ManagerRegistry $doctrine): Response
     {
-
         $entityManager = $doctrine->getManager();
         if ($user) {
             $form = $this->createForm(AdminType::class, $user);
