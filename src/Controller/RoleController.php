@@ -45,48 +45,55 @@ class RoleController extends AbstractController
         ]);
     }
 
-    /*
-        #[Route('/', name: 'roles.list')]
-        public function getRoles(Request $request, ManagerRegistry $doctrine): Response
-        {
-            $userRoleRepo = $doctrine->getRepository(UserRole::class);
-            $userRoles = $userRoleRepo->findAll();
-            return $this->json($userRoles, Response::HTTP_OK, [], [
+
+    #[Route('/', name: 'roles.list')]
+    public function getRoles(Request $request, ManagerRegistry $doctrine): Response
+    {
+        $userRoleRepo = $doctrine->getRepository(UserRole::class);
+        $userRoles = $userRoleRepo->findAll();
+        return $this->json($userRoles, Response::HTTP_OK, [], [
+            ObjectNormalizer::SKIP_NULL_VALUES => true,
+            ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                return $object->getId();
+            }
+        ]);
+    }
+
+
+    #[Route('/{id</d+>}', name: 'roles.get')]
+    public function getRole(int $id, ManagerRegistry $doctrine): Response
+    {
+        $userRoleRepo = $doctrine->getRepository(UserRole::class);
+        $userRole = $userRoleRepo->find($id);
+        if ($userRole) {
+            return $this->json($userRole, Response::HTTP_OK, [], [
                 ObjectNormalizer::SKIP_NULL_VALUES => true,
                 ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
                     return $object->getId();
                 }
             ]);
+        } else {
+            return new JsonResponse(["message" => "error"], 200);
+        }
+    }
+
+    #[Route('/{name}', name: 'roles.getByName')]
+    public function getRoleByName(string $name, ManagerRegistry $doctrine): Response
+    {
+        $userRoleRepo = $doctrine->getRepository(UserRole::class);
+        $userRole = $userRoleRepo->findBy(["name" => $name]);
+        if ($userRole) {
+            return $this->json($userRole, Response::HTTP_OK, [], [
+                ObjectNormalizer::SKIP_NULL_VALUES => true,
+                ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                    return $object->getId();
+                }
+            ]);
+        } else {
+            return new JsonResponse(["message" => "error"], 200);
         }
 
-        #[Route('/{id}', name: 'roles.get')]
-        public function getRole(int $id, ManagerRegistry $doctrine): Response
-        {
-            $userRoleRepo = $doctrine->getRepository(UserRole::class);
-            $userRole = $userRoleRepo->find($id);
-            if ($userRole) {
-                return new JsonResponse([
-                    "message" => "success",
-                    "data" => $userRole], 200);
-            } else {
-                return new JsonResponse(["message" => "error"], 200);
-            }
-        }
-
-        #[Route('/{name}', name: 'roles.getByName')]
-        public function getRoleByName(string $name, ManagerRegistry $doctrine): Response
-        {
-            $userRoleRepo = $doctrine->getRepository(UserRole::class);
-            $userRole = $userRoleRepo->findBy(["name" => $name]);
-            if ($userRole) {
-                return new JsonResponse([
-                    "message" => "success",
-                    "data" => $userRole], 200);
-            } else {
-                return new JsonResponse(["message" => "error"], 200);
-            }
-
-        }*/
+    }
 
     #[Route('/update/{id}', name: 'roles.update')]
     public function updateRole(UserRole $userRole = null, Request $request, ManagerRegistry $doctrine): Response
@@ -94,15 +101,11 @@ class RoleController extends AbstractController
 
         $entityManager = $doctrine->getManager();
         $userRoleRepo = $doctrine->getRepository(UserRole::class);
-        /* $updatedFields=$request->request->all();
-         unset($updatedFields["id"]);
-
-         dd($updatedFields);*/
         if ($userRole) {
             $form = $this->createForm(UserRoleType::class, $userRole);
             $form->handleRequest($request);
             $form->submit($request->request->all(), false);
-            if($request->request->get("userRoles")){
+            if ($request->request->get("userRoles")) {
                 $roleArray = explode(",", $request->request->get("userRoles"));
                 $userRole->emptyUserRoles();
                 foreach ($roleArray as $role) {
