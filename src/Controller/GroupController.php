@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 
-use App\Entity\Admin;
 use App\Entity\Group;
 use App\Entity\User;
 use App\Entity\UserRole;
@@ -16,11 +15,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
-#[Route('/api/groups')]
+#[Route('/groups')]
 class GroupController extends AbstractController
 {
-
-    #[Route('/add', name: 'group.add')]
     public function addGroup(ManagerRegistry $doctrine, Request $request): JsonResponse
     {
         $entityManager = $doctrine->getManager();
@@ -49,15 +46,15 @@ class GroupController extends AbstractController
         ]);
     }
 
-    #[Route('/addTo', name: 'group.addAdmin')]
+    #[Route('/addTo', name: 'group.addUser')]
     public function addToGroup(ManagerRegistry $doctrine, Request $request): JsonResponse
     {
         $entityManager = $doctrine->getManager();
-        $adminRepo = $doctrine->getRepository(Admin::class);
+        $userRepo = $doctrine->getRepository(User::class);
         $groupRepo = $doctrine->getRepository(Group::class);
-        $admin = $adminRepo->find($request->request->get("admin"));
+        $user = $userRepo->find($request->request->get("user"));
         $group = $groupRepo->find($request->request->get("group"));
-        $group->addAdmin($admin);
+        $group->addUser($user);
         $entityManager->persist($group);
         $entityManager->flush();
         return $this->json($group, Response::HTTP_OK, [], [
@@ -68,15 +65,15 @@ class GroupController extends AbstractController
         ]);
     }
 
-    #[Route('/removeFrom', name: 'group.removeAdmin')]
+    #[Route('/removeFrom', name: 'group.removeUser')]
     public function removeFromGroup(ManagerRegistry $doctrine, Request $request): JsonResponse
     {
         $entityManager = $doctrine->getManager();
-        $adminRepo = $doctrine->getRepository(Admin::class);
+        $userRepo = $doctrine->getRepository(User::class);
         $groupRepo = $doctrine->getRepository(Group::class);
-        $admin = $adminRepo->find($request->request->get("admin"));
+        $user = $userRepo->find($request->request->get("user"));
         $group = $groupRepo->find($request->request->get("group"));
-        $group->removeUser($admin);
+        $group->removeUser($user);
         $entityManager->persist($group);
         $entityManager->flush();
         return $this->json($group, Response::HTTP_OK, [], [
