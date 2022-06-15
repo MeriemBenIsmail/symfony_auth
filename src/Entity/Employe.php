@@ -31,6 +31,12 @@ class Employe extends User
     #[ORM\Column(type: 'string')]
     private $dateEmbauche;
 
+    #[ORM\OneToOne(targetEntity: ContactUrgence::class, cascade: ['persist', 'remove'])]
+    private $contactUrgence;
+
+    #[ORM\ManyToOne(targetEntity: Poste::class)]
+    private $poste;
+
 
 
     public function getNom(): ?string
@@ -115,4 +121,29 @@ class Employe extends User
 
         return $this;
     }
+
+    public function getContactUrgence(): ?ContactUrgence
+    {
+        return $this->contactUrgence;
+    }
+
+    public function setContactUrgence(?ContactUrgence $contactUrgence): self
+    {
+        $this->contactUrgence = $contactUrgence;
+
+        return $this;
+    }
+
+    public function getPoste(): ?Poste
+    {
+        return $this->poste;
+    }
+
+    public function setPoste(?Poste $poste): self
+    {
+        $this->poste = $poste;
+
+        return $this;
+    }
+
 }

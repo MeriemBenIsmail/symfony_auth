@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 // only superadmin can access the routes of this controller
-#[Route('/admins')]
+#[Route('/api/admins')]
 class AdminController extends AbstractController
 {
     #[Route('/add', name: 'admin.add')]
