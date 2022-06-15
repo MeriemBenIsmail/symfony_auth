@@ -18,6 +18,8 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 #[Route('/groups')]
 class GroupController extends AbstractController
 {
+    private $json;
+
     #[Route('/add', name: 'group.add')]
     public function addGroup(ManagerRegistry $doctrine, Request $request): JsonResponse
     {
@@ -25,7 +27,9 @@ class GroupController extends AbstractController
         $userRepo = $doctrine->getRepository(User::class);
         $userRoleRepo = $doctrine->getRepository(UserRole::class);
         $group = new Group();
-        $group->setName($request->request->get('name'));
+        $form = $this->createForm(GroupType::class, $group);
+        $form->handleRequest($request);
+        $form->submit($request->request->all(), false);;
         if ($request->request->get("users")) {
             $usersArray = explode(",", $request->request->get("users"));
             foreach ($usersArray as $user) {
@@ -40,8 +44,10 @@ class GroupController extends AbstractController
                 $group->addGroupRole($groupRol);
             }
         }
-        $entityManager->persist($group);
-        $entityManager->flush();
+        if ($form->isSubmitted()) {
+            $entityManager->persist($group);
+            $entityManager->flush();
+        }
         return $this->json($group, Response::HTTP_OK, [], [
             ObjectNormalizer::SKIP_NULL_VALUES => true,
             ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
@@ -98,20 +104,24 @@ class GroupController extends AbstractController
             $form = $this->createForm(GroupType::class, $group);
             $form->handleRequest($request);
             $form->submit($request->request->all(), false);
-            if ($request->request->get("users")) {
+            if ($request->request->get("users") !== null) {
                 $usersArray = explode(",", $request->request->get("users"));
                 $group->emptyUsers();
                 foreach ($usersArray as $user) {
-                    $usr = $userRepo->find($user);
-                    $group->addUser($usr);
+                    if ($user) {
+                        $usr = $userRepo->find($user);
+                        $group->addUser($usr);
+                    }
                 }
             }
-            if ($request->request->get("groupRoles")) {
+            if ($request->request->get("groupRoles") !== null) {
                 $groupRolesArray = explode(",", $request->request->get("groupRoles"));
                 $group->emptyGroupRoles();
                 foreach ($groupRolesArray as $groupRole) {
-                    $groupRol = $userRoleRepo->find($groupRole);
-                    $group->addGroupRole($groupRol);
+                    if ($groupRole) {
+                        $groupRol = $userRoleRepo->find($groupRole);
+                        $group->addGroupRole($groupRol);
+                    }
                 }
             }
             if ($form->isSubmitted()) {
@@ -130,6 +140,27 @@ class GroupController extends AbstractController
                 "message" => "error no group with this id", 200
             ]);
 
+        }
+    }
+
+    #[Route('/delete/{id<\d+>}', name: 'groups.delete')]
+    public function deleteGroup(Group $group, ManagerRegistry $doctrine): Response
+    {
+        $this->json = $this->json($group, Response::HTTP_OK, [], [
+            ObjectNormalizer::SKIP_NULL_VALUES => true,
+            ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                return $object->getId();
+            }
+        ]);
+        if ($group) {
+            $entityManager = $doctrine->getManager();
+            $entityManager->remove($group);
+            $entityManager->flush();
+            return $this->json;
+        } else {
+            return new JsonResponse([
+                    "message" => "error"]
+            );
         }
     }
 
