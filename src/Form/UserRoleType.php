@@ -13,8 +13,7 @@ class UserRoleType extends AbstractType
     {
         $builder
             ->add('name')
-            ->add('users')
-            ->add('userRole')
+            ->add('parentRole')
         ;
     }
 

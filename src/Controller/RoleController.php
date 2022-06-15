@@ -18,25 +18,25 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 class RoleController extends AbstractController
 {
     #[Route('/add', name: 'roles.add')]
-    public function addRole(AuthService $serv, Request $request, ManagerRegistry $doctrine): Response
-    {   /*if(!$serv->isSuperAdmin($this->getUser())){
-        return $this->json([
-            'error' => "unauthorized",401
-        ]);
-         }*/
+    public function addRole(Request $request, ManagerRegistry $doctrine): Response
+    {
         $entityManager = $doctrine->getManager();
         $userRoleRepo = $doctrine->getRepository(UserRole::class);
         $userRole = new UserRole();
-        $userRole->setName($request->request->get("name"));
-        if ($request->request->get("userRoles")) {
-            $roleArray = explode(",", $request->request->get("userRoles"));
+        $form = $this->createForm(UserRoleType::class, $userRole);
+        $form->handleRequest($request);
+        $form->submit($request->request->all(), false);;
+        if ($request->request->get("childRoles")) {
+            $roleArray = explode(",", $request->request->get("childRoles"));
             foreach ($roleArray as $role) {
                 $rol = $userRoleRepo->find($role);
-                $userRole->addUserRole($rol);
+                $userRole->addChildRole($rol);
             }
         }
-        $entityManager->persist($userRole);
-        $entityManager->flush();
+        if ($form->isSubmitted()) {
+            $entityManager->persist($userRole);
+            $entityManager->flush();
+        }
         return $this->json($userRole, Response::HTTP_OK, [], [
             ObjectNormalizer::SKIP_NULL_VALUES => true,
             ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
@@ -54,12 +54,13 @@ class RoleController extends AbstractController
             $form = $this->createForm(UserRoleType::class, $userRole);
             $form->handleRequest($request);
             $form->submit($request->request->all(), false);
-            if ($request->request->get("userRoles")) {
-                $roleArray = explode(",", $request->request->get("userRoles"));
-                $userRole->emptyUserRoles();
+            if ($request->request->get("childRoles")!==null) {
+                $roleArray = explode(",", $request->request->get("childRoles"));
+                $userRole->emptyChildRoles();
                 foreach ($roleArray as $role) {
+                    if($role){
                     $rol = $userRoleRepo->find($role);
-                    $userRole->addUserRole($rol);
+                    $userRole->addChildRole($rol);}
                 }
             }
             if ($form->isSubmitted()) {
@@ -125,4 +126,5 @@ class RoleController extends AbstractController
         }
 
     }
+
 }

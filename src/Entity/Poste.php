@@ -22,6 +22,7 @@ class Poste
     private $description;
 
     #[ORM\ManyToOne(targetEntity: self::class)]
+    #[ORM\JoinColumn(nullable:true, onDelete:"SET NULL")]
     private $superieur;
 
 
