@@ -17,11 +17,59 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 // only superadmin can access the routes of this controller
-#[Route('/api/admins')]
+#[Route('/admins')]
 class AdminController extends AbstractController
 {
-    #[Route('/add', name: 'admins.add')]
-    public function addAdmin(ManagerRegistry $doctrine,Request $request,UserPasswordHasherInterface $passwordHasher,AuthService $authService): JsonResponse
+    #[Route('/add', name: 'admin.add')]
+    public function addAdmin(ManagerRegistry $doctrine,Request $request,UserPasswordHasherInterface $passwordHasher): JsonResponse
+    {
+        $entityManager = $doctrine->getManager();
+        $admin = new User();
+        $form = $this->createForm(AdminType::class, $admin);
+        $hashedPassword = $passwordHasher->hashPassword(
+            $admin,
+            $request->request->get('password')
+        );
+
+        if ($request->request->get("groups")) {
+            $groupRepo = $doctrine->getRepository(Group::class);
+            $groupsArray = explode(",", $request->request->get("groups"));
+            foreach ($groupsArray as $group) {
+                $grp = $groupRepo->find($group);
+                $admin->addGroup($grp);
+            }
+        }
+        if ($request->request->get("roles")) {
+            $userRoleRepo = $doctrine->getRepository(UserRole::class);
+            $userRolesArray = explode(",", $request->request->get("roles"));
+            foreach ($userRolesArray as $userRole) {
+                $userRol = $userRoleRepo->find($userRole);
+                $admin->addUserRole($userRol);
+            }
+        }
+
+        $form->handleRequest($request);
+        // hashing the password
+
+        $form->submit($request->request->all(),false);
+        $newAdmin = $form->getData();
+        $newAdmin->setPassword($hashedPassword);
+
+        if ($form->isSubmitted()) {
+            $entityManager->persist($newAdmin);
+            $entityManager->flush();
+        }
+
+        return $this->json($newAdmin, Response::HTTP_OK, [], [
+            ObjectNormalizer::SKIP_NULL_VALUES => true,
+            ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                return $object->getId();
+            }
+        ]);
+    }
+
+    #[Route('/addTest', name: 'admins.addTest')]
+    public function addAdminTest(ManagerRegistry $doctrine,Request $request,UserPasswordHasherInterface $passwordHasher,AuthService $authService): JsonResponse
     {
         $user = $this->getUser();
 
