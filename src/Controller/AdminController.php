@@ -17,14 +17,63 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 // only superadmin can access the routes of this controller
-#[Route('/api/admins')]
+#[Route('/admins')]
 class AdminController extends AbstractController
 {
-    #[Route('/add', name: 'admins.add')]
-    public function addAdmin(ManagerRegistry $doctrine,Request $request,UserPasswordHasherInterface $passwordHasher,AuthService $authService): JsonResponse
+    #[Route('/add', name: 'admin.add')]
+    public function addAdmin(ManagerRegistry $doctrine,Request $request,UserPasswordHasherInterface $passwordHasher): JsonResponse
+    {
+        $entityManager = $doctrine->getManager();
+        $admin = new User();
+        $form = $this->createForm(AdminType::class, $admin);
+        $hashedPassword = $passwordHasher->hashPassword(
+            $admin,
+            $request->request->get('password')
+        );
+
+        if ($request->request->get("groups")) {
+            $groupRepo = $doctrine->getRepository(Group::class);
+            $groupsArray = explode(",", $request->request->get("groups"));
+            foreach ($groupsArray as $group) {
+                $grp = $groupRepo->find($group);
+                $admin->addGroup($grp);
+            }
+        }
+        if ($request->request->get("roles")) {
+            $userRoleRepo = $doctrine->getRepository(UserRole::class);
+            $userRolesArray = explode(",", $request->request->get("roles"));
+            foreach ($userRolesArray as $userRole) {
+                $userRol = $userRoleRepo->find($userRole);
+                $admin->addUserRole($userRol);
+            }
+        }
+
+        $form->handleRequest($request);
+        // hashing the password
+
+        $form->submit($request->request->all(),false);
+        $newAdmin = $form->getData();
+        $newAdmin->setPassword($hashedPassword);
+
+        if ($form->isSubmitted()) {
+            $entityManager->persist($newAdmin);
+            $entityManager->flush();
+        }
+
+        return $this->json($newAdmin, Response::HTTP_OK, [], [
+            ObjectNormalizer::SKIP_NULL_VALUES => true,
+            ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                return $object->getId();
+            }
+        ]);
+    }
+
+    #[Route('/addTest', name: 'admins.addTest')]
+    public function addAdminTest(ManagerRegistry $doctrine,Request $request,UserPasswordHasherInterface $passwordHasher,AuthService $authService): JsonResponse
     {
         $user = $this->getUser();
-        if($authService->isSuperAdmin($user)){
+
+        if($authService->hasRole($user,'admin','create_admin')){
             $entityManager = $doctrine->getManager();
             $admin = new User();
             $admin->setEmail($request->request->get('email'));
@@ -62,21 +111,40 @@ class AdminController extends AbstractController
             ]);
 
         }
-        return $this->json(['error' => 'you are not logged in as super admin'],401);
+        return $this->json(['error' => "you don't have access to this resource"],401);
 
 
     }
 
     #[Route('/update/{id}', name: 'employes.update')]
-    public function updateRole(User $user = null, Request $request, ManagerRegistry $doctrine): Response
+    public function updateAdmin(User $user = null, Request $request, ManagerRegistry $doctrine): Response
     {
 
-        $entityManager = $doctrine->getManager();
         if ($user) {
+            $entityManager = $doctrine->getManager();
+
             $form = $this->createForm(AdminType::class, $user);
             $form->handleRequest($request);
             $form->submit($request->request->all(), false);
 
+            if ($request->request->get("groups")) {
+                $groupRepo = $doctrine->getRepository(Group::class);
+                $groupsArray = explode(",", $request->request->get("groups"));
+                $user->emptyGroups();
+                foreach ($groupsArray as $group) {
+                    $grp = $groupRepo->find($group);
+                    $user->addGroup($grp);
+                }
+            }
+            if ($request->request->get("roles")) {
+                $roleRepo = $doctrine->getRepository(UserRole::class);
+                $roleArray = explode(",", $request->request->get("roles"));
+                $user->emptyUserRoles();
+                foreach ($roleArray as $role) {
+                    $rol = $roleRepo->find($role);
+                    $user->addUserRole($rol);
+                }
+            }
             if ($form->isSubmitted()) {
                 $entityManager->persist($user);
                 $entityManager->flush();
@@ -93,16 +161,6 @@ class AdminController extends AbstractController
         );
 
 
-    }
-
-    #[Route('/', name: 'admins.all')]
-    public function getAdmins(ManagerRegistry $doctrine)
-    {
-        $repo = $doctrine->getRepository(User::class);
-        $admins = $repo->findBy(['super' => 0]);
-        return $this->json([
-            'admins' => $admins,200
-        ]);
     }
 
     #[Route('/{id<\d+>}', name: 'admins.detail')]
@@ -123,6 +181,18 @@ class AdminController extends AbstractController
             'admin' => $admin,200
         ]);
     }
+
+    #[Route('/', name: 'admins.all')]
+    public function getAdmins(ManagerRegistry $doctrine)
+    {
+        $repo = $doctrine->getRepository(User::class);
+        $admins = $repo->findBy(['super' => 0]);
+        return $this->json([
+            'admins' => $admins,200
+        ]);
+    }
+
+
 
 
 

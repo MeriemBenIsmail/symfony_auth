@@ -146,7 +146,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->userRoles->contains($userRole)) {
             $this->userRoles[] = $userRole;
-            $userRole->addUser($this);
+
         }
 
         return $this;
@@ -167,6 +167,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getGroups(): Collection
     {
         return $this->groups;
+    }
+    public function emptyGroups(): self
+    {
+        $this->groups = new ArrayCollection();
+        return $this;
+
+    }
+
+    public function emptyUserRoles(): self
+    {
+        $this->userRoles = new ArrayCollection();
+        return $this;
+
     }
 
     public function addGroup(Group $group): self
