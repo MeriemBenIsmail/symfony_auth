@@ -62,7 +62,7 @@ class AuthService
         $role1= $this->roleController->getRoleByName($roleEntity,$this->doctrine);
 
         $groups = $user->getGroups();
-        $rolesUnion = array_merge($groups->getGroupRoles(),$user->getUserRoles());
+        $rolesUnion = array_merge(array($groups[0]->getGroupRoles()),array($user->getUserRoles()));
 
         if(in_array($role1,$rolesUnion)) {
             return true;

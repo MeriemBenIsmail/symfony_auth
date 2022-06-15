@@ -69,14 +69,34 @@ class AdminController extends AbstractController
     }
 
     #[Route('/update/{id}', name: 'employes.update')]
-    public function updateRole(User $user = null, Request $request, ManagerRegistry $doctrine): Response
+    public function updateAdmin(User $user = null, Request $request, ManagerRegistry $doctrine): Response
     {
-        $entityManager = $doctrine->getManager();
+
         if ($user) {
+            $entityManager = $doctrine->getManager();
+
             $form = $this->createForm(AdminType::class, $user);
             $form->handleRequest($request);
             $form->submit($request->request->all(), false);
 
+            if ($request->request->get("groups")) {
+                $groupRepo = $doctrine->getRepository(Group::class);
+                $groupsArray = explode(",", $request->request->get("groups"));
+                $user->emptyGroups();
+                foreach ($groupsArray as $group) {
+                    $grp = $groupRepo->find($group);
+                    $user->addGroup($grp);
+                }
+            }
+            if ($request->request->get("roles")) {
+                $roleRepo = $doctrine->getRepository(UserRole::class);
+                $roleArray = explode(",", $request->request->get("roles"));
+                $user->emptyUserRoles();
+                foreach ($roleArray as $role) {
+                    $rol = $roleRepo->find($role);
+                    $user->addUserRole($rol);
+                }
+            }
             if ($form->isSubmitted()) {
                 $entityManager->persist($user);
                 $entityManager->flush();
@@ -93,16 +113,6 @@ class AdminController extends AbstractController
         );
 
 
-    }
-
-    #[Route('/', name: 'admins.all')]
-    public function getAdmins(ManagerRegistry $doctrine)
-    {
-        $repo = $doctrine->getRepository(User::class);
-        $admins = $repo->findBy(['super' => 0]);
-        return $this->json([
-            'admins' => $admins,200
-        ]);
     }
 
     #[Route('/{id<\d+>}', name: 'admins.detail')]
@@ -123,6 +133,18 @@ class AdminController extends AbstractController
             'admin' => $admin,200
         ]);
     }
+
+    #[Route('/', name: 'admins.all')]
+    public function getAdmins(ManagerRegistry $doctrine)
+    {
+        $repo = $doctrine->getRepository(User::class);
+        $admins = $repo->findBy(['super' => 0]);
+        return $this->json([
+            'admins' => $admins,200
+        ]);
+    }
+
+
 
 
 
