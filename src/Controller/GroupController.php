@@ -88,7 +88,7 @@ class GroupController extends AbstractController
         ]);
     }
 
-    #[Route('/updateGroup/{id<\d+>}', name: 'group.update')]
+    #[Route('/update/{id<\d+>}', name: 'group.update')]
     public function updateGroup(Group $group = null, ManagerRegistry $doctrine, Request $request): JsonResponse
     {
         if ($group) {
