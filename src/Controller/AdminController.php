@@ -73,42 +73,9 @@ class AdminController extends AbstractController
     {
         $user = $this->getUser();
 
-        if($authService->hasRole($user,'admin','create_admin')){
-            $entityManager = $doctrine->getManager();
-            $admin = new User();
-            $admin->setEmail($request->request->get('email'));
-            $admin->setSuper($request->request->get('super'));
-            // hashing the password
-            $hashedPassword = $passwordHasher->hashPassword(
-                $admin,
-                $request->request->get('password')
-            );
-            if ($request->request->get("groups")) {
-                $groupRepo = $doctrine->getRepository(Group::class);
-                $groupsArray = explode(",", $request->request->get("groups"));
-                foreach ($groupsArray as $group) {
-                    $grp = $groupRepo->find($group);
-                    $grp->addUser($admin);
-                    $entityManager->persist($grp);
-                }
-            }
-            if ($request->request->get("roles")) {
-                $userRoleRepo = $doctrine->getRepository(UserRole::class);
-                $userRolesArray = explode(",", $request->request->get("roles"));
-                foreach ($userRolesArray as $userRole) {
-                    $userRol = $userRoleRepo->find($userRole);
-                    $admin->addUserRole($userRol);
-                }
-            }
-            $admin->setPassword($hashedPassword);
-            $entityManager->persist($admin);
-            $entityManager->flush();
-            return $this->json($admin, Response::HTTP_OK, [], [
-                ObjectNormalizer::SKIP_NULL_VALUES => true,
-                ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
-                    return $object->getId();
-                }
-            ]);
+        if($authService->hasRole($user,'create_admin')){
+
+            return $this->json("hii");
 
         }
         return $this->json(['error' => "you don't have access to this resource"],401);
@@ -116,7 +83,7 @@ class AdminController extends AbstractController
 
     }
 
-    #[Route('/update/{id}', name: 'employes.update')]
+    #[Route('/update/{id}', name: 'admins.update')]
     public function updateAdmin(User $user = null, Request $request, ManagerRegistry $doctrine): Response
     {
 
@@ -150,10 +117,12 @@ class AdminController extends AbstractController
                 $entityManager->flush();
             }
 
-            return $this->json([
-                "message" => "success",
-                "data" => $user], 200
-            );
+            return $this->json($user, Response::HTTP_OK, [], [
+                ObjectNormalizer::SKIP_NULL_VALUES => true,
+                ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                    return $object->getId();
+                }
+            ]);
         }
         return $this->json([
             "message" => "error",
@@ -163,11 +132,34 @@ class AdminController extends AbstractController
 
     }
 
+    #[Route('/delete/{id<\d+>}', name: 'admins.delete')]
+    public function deleteAdmin(User $admin, ManagerRegistry $doctrine): Response
+    {
+        if ($admin) {
+            $entityManager = $doctrine->getManager();
+            $entityManager->remove($admin);
+            $entityManager->flush();
+            return $this->json($admin, Response::HTTP_OK, [], [
+                ObjectNormalizer::SKIP_NULL_VALUES => true,
+                ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                    return $object->getId();
+                }
+            ]);
+        } else {
+            return new JsonResponse([
+                    "message" => "error"]
+            );
+        }
+    }
+
     #[Route('/{id<\d+>}', name: 'admins.detail')]
     public function detail(User $admin = null): JsonResponse
     {
-        return $this->json([
-            'admin' => $admin,200
+        return $this->json($admin, Response::HTTP_OK, [], [
+            ObjectNormalizer::SKIP_NULL_VALUES => true,
+            ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                return $object->getId();
+            }
         ]);
     }
 
@@ -177,8 +169,11 @@ class AdminController extends AbstractController
 
         $repo = $doctrine->getRepository(User::class);
         $admin= $repo->findBy(['email' => $email]);
-        return $this->json([
-            'admin' => $admin,200
+        return $this->json($admin, Response::HTTP_OK, [], [
+            ObjectNormalizer::SKIP_NULL_VALUES => true,
+            ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                return $object->getId();
+            }
         ]);
     }
 
@@ -187,8 +182,11 @@ class AdminController extends AbstractController
     {
         $repo = $doctrine->getRepository(User::class);
         $admins = $repo->findBy(['super' => 0]);
-        return $this->json([
-            'admins' => $admins,200
+        return $this->json($admins, Response::HTTP_OK, [], [
+            ObjectNormalizer::SKIP_NULL_VALUES => true,
+            ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                return $object->getId();
+            }
         ]);
     }
 

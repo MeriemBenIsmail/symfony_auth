@@ -32,9 +32,11 @@ class Employe extends User
     private $dateEmbauche;
 
     #[ORM\OneToOne(targetEntity: ContactUrgence::class, cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable:true, onDelete:"SET NULL")]
     private $contactUrgence;
 
     #[ORM\ManyToOne(targetEntity: Poste::class)]
+    #[ORM\JoinColumn(nullable:true, onDelete:"SET NULL")]
     private $poste;
 
 

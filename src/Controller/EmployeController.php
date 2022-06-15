@@ -177,6 +177,26 @@ class EmployeController extends AbstractController
 
     }
 
+    #[Route('/delete/{id<\d+>}', name: 'employes.delete')]
+    public function deleteEmploye(Employe $employe, ManagerRegistry $doctrine): Response
+    {
+        if ($employe) {
+            $entityManager = $doctrine->getManager();
+            $entityManager->remove($employe);
+            $entityManager->flush();
+            return $this->json($employe, Response::HTTP_OK, [], [
+                ObjectNormalizer::SKIP_NULL_VALUES => true,
+                ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                    return $object->getId();
+                }
+            ]);
+        } else {
+            return new JsonResponse([
+                    "message" => "error"]
+            );
+        }
+    }
+
     #[Route('/', name: 'employes.all')]
     public function getEmployes(ManagerRegistry $doctrine)
     {
