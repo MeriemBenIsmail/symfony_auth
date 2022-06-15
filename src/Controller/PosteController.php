@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\Poste;
 use App\Form\PosteType;
 use Doctrine\Persistence\ManagerRegistry;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -12,11 +14,17 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
-#[Route('/postes')]
+#[Route('/api/posts')]
 class PosteController extends AbstractController
 {
 
     #[Route('/add', name: 'postes.add')]
+    /**
+     * Require ROLE_SUPER_ADMIN only for this action
+     *
+     * @IsGranted("ROLE_POSTS")
+     */
+    #[Security("is_granted('ROLE_POSTS') or is_granted('ROLE_POSTS_CREATE')")]
     public function addPoste(Request $request, ManagerRegistry $doctrine): Response
     {
         $entityManager = $doctrine->getManager();

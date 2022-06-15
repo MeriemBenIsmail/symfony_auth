@@ -9,6 +9,13 @@ security:
             entity:
                 class: App\Entity\User
                 property: email
+    role_hierarchy:
+        ROLE_POSTS: [ROLE_POST_CREATE,ROLE_POST_DELETE,ROLE_POST_READ,ROLE_POST_UPDATE]
+        ROLE_USERS: [ROLE_USERS_CREATE,ROLE_USERS_DELETE,ROLE_USERS_READ,ROLE_USERS_UPDATE]
+        ROLE_EMPLOYES: [ROLE_EMPLOYES_CREATE,ROLE_EMPLOYES_DELETE,ROLE_EMPLOYES_READ,ROLE_EMPLOYES_UPDATE]
+        ROLE_GROUPS: [ROLE_GROUPS_CREATE,ROLE_GROUPS_DELETE,ROLE_GROUPS_READ,ROLE_GROUPS_UPDATE]
+        ROLE_ADMIN: ROLE_USER
+        ROLE_SUPER_ADMIN: [ ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH,ROLE_POSTS,ROLE_USERS,ROLE_EMPLOYES]
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
@@ -40,6 +47,7 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
 
 when@test:

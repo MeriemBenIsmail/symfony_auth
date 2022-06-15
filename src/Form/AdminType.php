@@ -15,7 +15,6 @@ class AdminType extends AbstractType
             ->add('email')
             ->add('super')
             ->add('password')
-            ->add('userRoles')
             ->add('groups')
         ;
     }

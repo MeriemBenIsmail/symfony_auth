@@ -29,21 +29,22 @@ class GroupController extends AbstractController
         $group = new Group();
         $form = $this->createForm(GroupType::class, $group);
         $form->handleRequest($request);
-        $form->submit($request->request->all(), false);;
+        $form->submit($request->request->all(), false);
+
+        if ($request->request->get("roles")) {
+            $roles = explode(",", $request->request->get("roles"));
+            $group->setRoles($roles);
+        }
         if ($request->request->get("users")) {
             $usersArray = explode(",", $request->request->get("users"));
             foreach ($usersArray as $user) {
                 $usr = $userRepo->find($user);
                 $group->addUser($usr);
+
+
             }
         }
-        if ($request->request->get("groupRoles")) {
-            $groupRolesArray = explode(",", $request->request->get("groupRoles"));
-            foreach ($groupRolesArray as $groupRole) {
-                $groupRol = $userRoleRepo->find($groupRole);
-                $group->addGroupRole($groupRol);
-            }
-        }
+
         if ($form->isSubmitted()) {
             $entityManager->persist($group);
             $entityManager->flush();
@@ -104,9 +105,13 @@ class GroupController extends AbstractController
             $form = $this->createForm(GroupType::class, $group);
             $form->handleRequest($request);
             $form->submit($request->request->all(), false);
+            if ($request->request->get("roles")) {
+                $roles = explode(",", $request->request->get("roles"));
+                $group->setRoles($roles);
+            }
             if ($request->request->get("users") !== null) {
-                $usersArray = explode(",", $request->request->get("users"));
                 $group->emptyUsers();
+                $usersArray = explode(",", $request->request->get("users"));
                 foreach ($usersArray as $user) {
                     if ($user) {
                         $usr = $userRepo->find($user);
@@ -114,16 +119,8 @@ class GroupController extends AbstractController
                     }
                 }
             }
-            if ($request->request->get("groupRoles") !== null) {
-                $groupRolesArray = explode(",", $request->request->get("groupRoles"));
-                $group->emptyGroupRoles();
-                foreach ($groupRolesArray as $groupRole) {
-                    if ($groupRole) {
-                        $groupRol = $userRoleRepo->find($groupRole);
-                        $group->addGroupRole($groupRol);
-                    }
-                }
-            }
+
+
             if ($form->isSubmitted()) {
                 $entityManager->persist($group);
                 $entityManager->flush();
