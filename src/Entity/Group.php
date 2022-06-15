@@ -90,7 +90,9 @@ class Group
 
     public function emptyGroupRoles(): self
     {
-        $this->groupRoles = new ArrayCollection();
+        foreach ($this->groupRoles as $groupRole) {
+            $this->removeGroupRole($groupRole);
+        }
         return $this;
 
     }

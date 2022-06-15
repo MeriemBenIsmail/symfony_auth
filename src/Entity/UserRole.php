@@ -19,17 +19,16 @@ class  UserRole
     private $name;
 
 
-    #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'userRoles')]
-    #[ORM\JoinColumn(onDelete:"CASCADE")]
-    private $userRole;
+    #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'childRoles')]
+    private $parentRole;
 
-    #[ORM\OneToMany(mappedBy: 'userRole', targetEntity: self::class)]
-    private $userRoles;
+    #[ORM\OneToMany(mappedBy: 'parentRole', targetEntity: self::class)]
+    private $childRoles;
 
 
     public function __construct()
     {
-        $this->userRoles = new ArrayCollection();
+        $this->childRoles = new ArrayCollection();
     }
 
 
@@ -51,49 +50,52 @@ class  UserRole
     }
 
 
-
-    public function getUserRole(): ?self
+    public function getParentRole(): ?self
     {
-        return $this->userRole;
+        return $this->parentRole;
     }
 
-    public function setUserRole(?self $userRole): self
+    public function setParentRole(?self $parentRole): self
     {
-        $this->userRole = $userRole;
-
+        $this->parentRole = $parentRole;
+        if($parentRole!=null){
+            $parentRole->addChildRole($this);
+        }
         return $this;
     }
 
     /**
      * @return Collection<int, self>
      */
-    public function getUserRoles(): Collection
+    public function getChildRoles(): Collection
     {
-        return $this->userRoles;
-    }
-    public function  emptyUserRoles():self
-    {
-        $this->userRoles=new ArrayCollection();
-        return $this;
-
+        return $this->childRoles;
     }
 
-    public function addUserRole(self $userRole): self
+    public function emptyChildRoles(): self
     {
-        if (!$this->userRoles->contains($userRole)) {
-            $this->userRoles[] = $userRole;
-            $userRole->setUserRole($this);
+        foreach ($this->childRoles as $child) {
+            $this->removeChildRole($child);
+        }
+        return  $this;
+    }
+
+    public function addChildRole(self $childRole): self
+    {
+        if (!$this->childRoles->contains($childRole)) {
+            $this->childRoles[] = $childRole;
+            $childRole->setParentRole($this);
         }
 
         return $this;
     }
 
-    public function removeUserRole(self $userRole): self
+    public function removeChildRole(self $childRole): self
     {
-        if ($this->userRoles->removeElement($userRole)) {
+        if ($this->childRoles->removeElement($childRole)) {
             // set the owning side to null (unless already changed)
-            if ($userRole->getUserRole() === $this) {
-                $userRole->setUserRole(null);
+            if ($childRole->getParentRole() === $this) {
+                $childRole->setParentRole(null);
             }
         }
 

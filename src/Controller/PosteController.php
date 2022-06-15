@@ -6,6 +6,7 @@ use App\Entity\Poste;
 use App\Form\PosteType;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -58,6 +59,26 @@ class PosteController extends AbstractController
         return new JsonResponse([
             "message" => "error",
             "data" => "No such poste"], 200);
+    }
+
+    #[Route('/delete/{id<\d+>}', name: 'postes.delete')]
+    public function deletePoste(ManagerRegistry $doctrine, Poste $poste = null): Response
+    {
+        if ($poste) {
+            $entityManager = $doctrine->getManager();
+            $entityManager->remove($poste);
+            $entityManager->flush();
+            return $this->json($poste, Response::HTTP_OK, [], [
+                ObjectNormalizer::SKIP_NULL_VALUES => true,
+                ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                    return $object->getId();
+                }
+            ]);
+        } else {
+            return new JsonResponse([
+                "message" => "error",
+                "data" => "No such poste"], 200);
+        }
     }
 
     #[Route('/', name: 'postes.list')]
