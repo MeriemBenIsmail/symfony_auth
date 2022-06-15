@@ -146,7 +146,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->userRoles->contains($userRole)) {
             $this->userRoles[] = $userRole;
-            $userRole->addUser($this);
+
         }
 
         return $this;

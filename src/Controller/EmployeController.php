@@ -24,6 +24,56 @@ class EmployeController extends AbstractController
     {
         $entityManager = $doctrine->getManager();
         $employe = new Employe();
+        $form = $this->createForm(EmployeType::class, $employe);
+        $date= strtotime($request->request->get('dateEmbauche'));
+        $newdate=date("Y-m-d",$date);
+        $hashedPassword = $passwordHasher->hashPassword(
+            $employe,
+            $request->request->get('password')
+        );
+
+        if ($request->request->get("groups")) {
+            $groupRepo = $doctrine->getRepository(Group::class);
+            $groupsArray = explode(",", $request->request->get("groups"));
+            foreach ($groupsArray as $group) {
+                $grp = $groupRepo->find($group);
+                $employe->addGroup($grp);
+            }
+        }
+        if ($request->request->get("roles")) {
+            $userRoleRepo = $doctrine->getRepository(UserRole::class);
+            $userRolesArray = explode(",", $request->request->get("roles"));
+            foreach ($userRolesArray as $userRole) {
+                $userRol = $userRoleRepo->find($userRole);
+                $employe->addUserRole($userRol);
+            }
+        }
+
+        $form->handleRequest($request);
+        // hashing the password
+
+        $form->submit($request->request->all(),false);
+        $newEmploye = $form->getData();
+        $newEmploye->setPassword($hashedPassword);
+
+        if ($form->isSubmitted()) {
+            $entityManager->persist($newEmploye);
+            $entityManager->flush();
+        }
+
+        return $this->json($newEmploye, Response::HTTP_OK, [], [
+            ObjectNormalizer::SKIP_NULL_VALUES => true,
+            ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                return $object->getId();
+            }
+        ]);
+    }
+
+    #[Route('/addTest', name: 'employe.addTest')]
+    public function addEmployeTest(ManagerRegistry $doctrine,Request $request,UserPasswordHasherInterface $passwordHasher): JsonResponse
+    {
+        $entityManager = $doctrine->getManager();
+        $employe = new Employe();
         $employe->setEmail($request->request->get('email'));
         // hashing the password
         $hashedPassword = $passwordHasher->hashPassword(
