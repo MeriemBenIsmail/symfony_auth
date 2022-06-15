@@ -73,11 +73,29 @@ class EmployeController extends AbstractController
     {
 
         $entityManager = $doctrine->getManager();
-        //$repo = $doctrine->getRepository(Employe::class);
         if ($employe) {
             $form = $this->createForm(EmployeType::class, $employe);
             $form->handleRequest($request);
             $form->submit($request->request->all(), false);
+
+            if ($request->request->get("groups")) {
+                $groupRepo = $doctrine->getRepository(Group::class);
+                $groupsArray = explode(",", $request->request->get("groups"));
+                $employe->emptyGroups();
+                foreach ($groupsArray as $group) {
+                    $grp = $groupRepo->find($group);
+                    $employe->addGroup($grp);
+                }
+            }
+            if ($request->request->get("roles")) {
+                $roleRepo = $doctrine->getRepository(UserRole::class);
+                $roleArray = explode(",", $request->request->get("roles"));
+                $employe->emptyUserRoles();
+                foreach ($roleArray as $role) {
+                    $rol = $roleRepo->find($role);
+                    $employe->addUserRole($rol);
+                }
+            }
 
             if ($form->isSubmitted()) {
                 $entityManager->persist($employe);

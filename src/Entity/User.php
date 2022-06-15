@@ -168,6 +168,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         return $this->groups;
     }
+    public function emptyGroups(): self
+    {
+        $this->groups = new ArrayCollection();
+        return $this;
+
+    }
+
+    public function emptyUserRoles(): self
+    {
+        $this->userRoles = new ArrayCollection();
+        return $this;
+
+    }
 
     public function addGroup(Group $group): self
     {
