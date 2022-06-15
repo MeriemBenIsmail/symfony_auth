@@ -24,6 +24,8 @@ class EmployeType extends AbstractType
             ->add('dateEmbauche')
             ->add('userRoles')
             ->add('groups')
+            ->add('poste')
+            ->add('contactUrgence')
         ;
     }
 

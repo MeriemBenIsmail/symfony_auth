@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\ContactUrgence;
 use App\Entity\Employe;
 use App\Entity\Group;
+use App\Entity\Poste;
 use App\Entity\UserRole;
 use App\Form\EmployeType;
 use Doctrine\Persistence\ManagerRegistry;
@@ -47,6 +49,16 @@ class EmployeController extends AbstractController
                 $userRol = $userRoleRepo->find($userRole);
                 $employe->addUserRole($userRol);
             }
+        }
+       if ($request->request->get('contactUrgence')) {
+            $contactRepo = $doctrine->getRepository(ContactUrgence::class);
+            $contact = $contactRepo->find($request->request->get('contactUrgence'));
+            $employe->setContactUrgence($contact);
+        }
+        if ($request->request->get('poste')) {
+            $posteRepo = $doctrine->getRepository(Poste::class);
+            $poste = $posteRepo->find($request->request->get('poste'));
+            $employe->setPoste($poste);
         }
 
         $form->handleRequest($request);
