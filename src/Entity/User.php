@@ -154,9 +154,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function removeUserRole(UserRole $userRole): self
     {
-        if ($this->userRoles->removeElement($userRole)) {
-            $userRole->removeUser($this);
-        }
+        $this->userRoles->removeElement($userRole) ;
 
         return $this;
     }

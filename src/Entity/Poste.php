@@ -25,6 +25,12 @@ class Poste
     private $superieur;
 
 
+    public function __construct()
+    {
+        $this->employes = new ArrayCollection();
+    }
+
+
 
     public function getId(): ?int
     {
@@ -66,5 +72,6 @@ class Poste
 
         return $this;
     }
+
 
 }
