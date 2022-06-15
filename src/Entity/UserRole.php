@@ -20,6 +20,7 @@ class  UserRole
 
 
     #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'childRoles')]
+    #[ORM\JoinColumn(nullable:true, onDelete:"SET NULL")]
     private $parentRole;
 
     #[ORM\OneToMany(mappedBy: 'parentRole', targetEntity: self::class)]

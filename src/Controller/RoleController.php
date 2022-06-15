@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Entity\UserRole;
 use App\Form\UserRoleType;
 use App\Service\AuthService;
@@ -54,13 +55,14 @@ class RoleController extends AbstractController
             $form = $this->createForm(UserRoleType::class, $userRole);
             $form->handleRequest($request);
             $form->submit($request->request->all(), false);
-            if ($request->request->get("childRoles")!==null) {
+            if ($request->request->get("childRoles") !== null) {
                 $roleArray = explode(",", $request->request->get("childRoles"));
                 $userRole->emptyChildRoles();
                 foreach ($roleArray as $role) {
-                    if($role){
-                    $rol = $userRoleRepo->find($role);
-                    $userRole->addChildRole($rol);}
+                    if ($role) {
+                        $rol = $userRoleRepo->find($role);
+                        $userRole->addChildRole($rol);
+                    }
                 }
             }
             if ($form->isSubmitted()) {
@@ -77,6 +79,26 @@ class RoleController extends AbstractController
         return new JsonResponse([
             "message" => "error",
             "data" => "No such userRole"], 200);
+    }
+
+    #[Route('/delete/{id<\d+>}', name: 'roles.delete')]
+    public function deleteRole(UserRole $userRole, ManagerRegistry $doctrine): Response
+    {
+        if ($userRole) {
+            $entityManager = $doctrine->getManager();
+            $entityManager->remove($userRole);
+            $entityManager->flush();
+            return $this->json($userRole, Response::HTTP_OK, [], [
+                ObjectNormalizer::SKIP_NULL_VALUES => true,
+                ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                    return $object->getId();
+                }
+            ]);
+        } else {
+            return new JsonResponse([
+                    "message" => "error"]
+            );
+        }
     }
 
     #[Route('/', name: 'roles.list')]

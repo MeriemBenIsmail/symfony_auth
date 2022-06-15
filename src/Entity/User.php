@@ -13,8 +13,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[ORM\Table(name: '`user`')]
 #[ORM\InheritanceType('SINGLE_TABLE')]
 #[ORM\DiscriminatorColumn(name: "discr", type: "string")]
-#[ORM\DiscriminatorMap(["user" => User::class,"employe" => Employe::class])]
-
+#[ORM\DiscriminatorMap(["user" => User::class, "employe" => Employe::class])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -25,7 +24,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 180, unique: true)]
     protected $email;
 
-    #[ORM\Column(type: 'boolean',nullable: true)]
+    #[ORM\Column(type: 'boolean', nullable: true)]
     private $super;
 
     private $roles = [];
@@ -66,7 +65,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUsername(): string
     {
-        return (string) $this->email;
+        return (string)$this->email;
     }
 
 
@@ -81,6 +80,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
     /**
      * A visual identifier that represents this user.
      *
@@ -88,7 +88,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getUserIdentifier(): string
     {
-        return (string) $this->email;
+        return (string)$this->email;
     }
 
     /**
@@ -168,6 +168,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         return $this->groups;
     }
+
     public function emptyGroups(): self
     {
         $this->groups = new ArrayCollection();
