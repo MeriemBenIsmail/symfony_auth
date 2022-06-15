@@ -44,7 +44,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->userRoles = new ArrayCollection();
     }
 
-
     public function getId(): ?int
     {
         return $this->id;
@@ -62,12 +61,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-
     public function getUsername(): string
     {
         return (string)$this->email;
     }
-
 
     public function isSuper(): ?bool
     {

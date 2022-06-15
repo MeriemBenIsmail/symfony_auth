@@ -25,14 +25,6 @@ class Poste
     #[ORM\JoinColumn(nullable:true, onDelete:"SET NULL")]
     private $superieur;
 
-
-    public function __construct()
-    {
-        $this->employes = new ArrayCollection();
-    }
-
-
-
     public function getId(): ?int
     {
         return $this->id;
