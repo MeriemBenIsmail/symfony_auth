@@ -25,7 +25,6 @@ class Poste
     #[ORM\JoinColumn(nullable:true, onDelete:"SET NULL")]
     private $superieur;
 
-
     public function getId(): ?int
     {
         return $this->id;
