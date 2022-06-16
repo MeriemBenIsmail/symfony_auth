@@ -12,6 +12,7 @@
         "doctrine/doctrine-migrations-bundle": "^3.2",
         "doctrine/orm": "^2.12",
         "gesdinet/jwt-refresh-token-bundle": "^1.1",
+        "guikingone/scheduler-bundle": "^0.9.3",
         "lexik/jwt-authentication-bundle": "^2.16",
         "phpdocumentor/reflection-docblock": "^5.3",
         "phpstan/phpdoc-parser": "^1.6",
@@ -46,7 +47,7 @@
         "symfony/webpack-encore-bundle": "^1.12",
         "symfony/yaml": "*",
         "twig/extra-bundle": "^2.12|^3.0",
-        "twig/twig": "^2.12|^3.0"
+        "twig/twig": "^2.12|^3.0",
     },
     "config": {
         "allow-plugins": {
