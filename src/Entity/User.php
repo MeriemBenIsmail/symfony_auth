@@ -27,13 +27,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'boolean', nullable: true)]
     private $super;
 
+    #[ORM\Column(type: 'json')]
     private $roles = [];
 
     #[ORM\Column(type: 'string')]
     protected $password;
 
-    #[ORM\ManyToMany(targetEntity: UserRole::class)]
-    private $userRoles;
 
     #[ORM\ManyToMany(targetEntity: Group::class, mappedBy: 'users')]
     private $groups;
@@ -41,7 +40,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __construct()
     {
         $this->groups = new ArrayCollection();
-        $this->userRoles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -93,17 +91,32 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getRoles(): array
     {
-        $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
 
-        return array_unique($roles);
+        $groups = $this->getGroups();
+        $rolesUnion = $this->roles;
+        foreach ($groups as $group) {
+            if ($group) {
+                if ($group->getRoles()) {
+                    $rolesUnion = array_merge($rolesUnion, $group->getRoles());
+                }
+            }
+        }
+        return array_unique($rolesUnion);
     }
 
     public function setRoles(array $roles): self
     {
         $this->roles = $roles;
 
+        return $this;
+    }
+
+    public function uniteRoles(array $roles): self
+    {
+        foreach ($roles as $role) {
+
+            $this->roles[] = $role;
+        }
         return $this;
     }
 
@@ -131,30 +144,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         // $this->plainPassword = null;
     }
 
-    /**
-     * @return Collection<int, UserRole>
-     */
-    public function getUserRoles(): Collection
-    {
-        return $this->userRoles;
-    }
-
-    public function addUserRole(UserRole $userRole): self
-    {
-        if (!$this->userRoles->contains($userRole)) {
-            $this->userRoles[] = $userRole;
-
-        }
-
-        return $this;
-    }
-
-    public function removeUserRole(UserRole $userRole): self
-    {
-        $this->userRoles->removeElement($userRole) ;
-
-        return $this;
-    }
 
     /**
      * @return Collection<int, Group>
@@ -166,23 +155,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function emptyGroups(): self
     {
-        $this->groups = new ArrayCollection();
+        foreach ($this->groups as $group) {
+            $this->removeGroup($group);
+        }
         return $this;
 
     }
 
-    public function emptyUserRoles(): self
-    {
-        $this->userRoles = new ArrayCollection();
-        return $this;
-
-    }
 
     public function addGroup(Group $group): self
     {
         if (!$this->groups->contains($group)) {
             $this->groups[] = $group;
-            $group->addUser($this);
+                $group->addUser($this);
+
         }
 
         return $this;

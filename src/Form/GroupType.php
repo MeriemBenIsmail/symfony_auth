@@ -14,7 +14,6 @@ class GroupType extends AbstractType
         $builder
             ->add('name')
             ->add('users')
-            ->add('groupRoles')
         ;
     }
 

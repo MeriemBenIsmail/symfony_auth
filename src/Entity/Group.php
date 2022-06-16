@@ -23,13 +23,12 @@ class Group
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'groups')]
     private $users;
 
-    #[ORM\ManyToMany(targetEntity: UserRole::class)]
-    private $groupRoles;
+    #[ORM\Column(type: 'json')]
+    private $roles = [];
 
     public function __construct()
     {
         $this->users = new ArrayCollection();
-        $this->groupRoles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -78,39 +77,18 @@ class Group
     public function removeUser(User $user): self
     {
         $this->users->removeElement($user);
-
         return $this;
     }
 
-    /**
-     * @return Collection<int, UserRole>
-     */
-    public function getGroupRoles(): Collection
+    public function getRoles(): array
     {
-        return $this->groupRoles;
+        $roles = $this->roles;
+        return array_unique($roles);
     }
 
-    public function emptyGroupRoles(): self
+    public function setRoles(array $roles): self
     {
-        foreach ($this->groupRoles as $groupRole) {
-            $this->removeGroupRole($groupRole);
-        }
-        return $this;
-
-    }
-
-    public function addGroupRole(UserRole $groupRole): self
-    {
-        if (!$this->groupRoles->contains($groupRole)) {
-            $this->groupRoles[] = $groupRole;
-        }
-
-        return $this;
-    }
-
-    public function removeGroupRole(UserRole $groupRole): self
-    {
-        $this->groupRoles->removeElement($groupRole);
+        $this->roles = $roles;
 
         return $this;
     }
