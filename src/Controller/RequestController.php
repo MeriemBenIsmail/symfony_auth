@@ -3,13 +3,14 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 #[Route('/requests')]
 class RequestController extends AbstractController
 {
     #[Route('/', name: 'requests.list')]
-    public function getRequests(Reque $request, ManagerRegistry $doctrine): Response
+    public function getRequests(Request $request, ManagerRegistry $doctrine): Response
     {
         $posteRepo = $doctrine->getRepository(Poste::class);
         $postes = $posteRepo->findAll();
