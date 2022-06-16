@@ -35,7 +35,25 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
                 }
             ]);
         }
-
+        #[Route('/delete/{id<\d+>}', name: 'contacts.delete')]
+        public function deleteContact(ManagerRegistry $doctrine, ContactUrgence $contact = null): Response
+        {
+            if ($contact) {
+                $entityManager = $doctrine->getManager();
+                $entityManager->remove($contact);
+                $entityManager->flush();
+                return $this->json($contact, Response::HTTP_OK, [], [
+                    ObjectNormalizer::SKIP_NULL_VALUES => true,
+                    ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                        return $object->getId();
+                    }
+                ]);
+            } else {
+                return new JsonResponse([
+                    "message" => "error",
+                    "data" => "No such contact"], 200);
+            }
+        }
         #[Route('/update/{id<\d+>}', name: 'contacts.update')]
         public function updateContact(ContactUrgence $contact = null, Request $request, ManagerRegistry $doctrine): Response
         {
