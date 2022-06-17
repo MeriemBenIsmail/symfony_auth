@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Entity;
-App\Repository\EmployeRepository;
+use App\Repository\EmployeRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: EmployeRepository::class)]
