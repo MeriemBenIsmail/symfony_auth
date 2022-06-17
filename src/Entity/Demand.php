@@ -2,8 +2,10 @@
 
 namespace App\Entity;
 
+
 use App\Repository\RequestRepository;
 use Doctrine\ORM\Mapping as ORM;
+
 
 #[ORM\Entity(repositoryClass: RequestRepository::class)]
 class Demand
@@ -16,7 +18,9 @@ class Demand
     #[ORM\Column(type: 'string', length: 255)]
     private $description;
 
+
     #[ORM\Column(type: 'string', length: 255)]
+
     private $status;
 
     #[ORM\Column(type: 'string', length: 255)]
@@ -36,6 +40,7 @@ class Demand
 
     #[ORM\ManyToOne(targetEntity: Employe::class)]
     private $employe;
+
 
     public function getId(): ?int
     {
