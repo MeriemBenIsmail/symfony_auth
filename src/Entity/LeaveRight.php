@@ -8,6 +8,8 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: LeaveRightRepository::class)]
 class LeaveRight
 {
+    const ACTIVE="ACTIVE";
+    const EXPIRED="EXPIRED";
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]

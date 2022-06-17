@@ -40,24 +40,7 @@ class LeaveRightController extends AbstractController
 
         $leaveRight->setStartValidityDate($newDateStart);
         $leaveRight->setEndValidityDate($newDateEnd);
-        $leaveRight->setStatus('valid');
-
-        if ($request->request->get("employee")) {
-            $employeeRepo = $doctrine->getRepository(Employe::class);
-            $employee = $employeeRepo->find($request->request->get("employee"));
-            if($employee) {
-                $leaveRight->setEmploye($employee);
-            }
-
-        }
-        if ($request->request->get("leave_type")) {
-            $leaveTypeRepo = $doctrine->getRepository(LeaveType::class);
-            $leaveType = $leaveTypeRepo->find($request->request->get("leave_type"));
-            if($leaveType) {
-                $leaveRight->setLeaveType($leaveType);
-            }
-
-        }
+        $leaveRight->setStatus(LeaveRight::ACTIVE);
 
         if ($form->isSubmitted()) {
             $entityManager->persist($leaveRight);
@@ -76,27 +59,15 @@ class LeaveRightController extends AbstractController
     public function updateLeaveRights(LeaveRight $leaveRight = null, ManagerRegistry $doctrine, Request $request): JsonResponse
     {
         if ($leaveRight) {
-            $leaveRightRepo = $doctrine->getRepository(LeaveRight::class);
             $entityManager = $doctrine->getManager();
             $form = $this->createForm(LeaveRightType::class, $leaveRight);
             $form->handleRequest($request);
             $form->submit($request->request->all(), false);
 
-
-            if ($request->request->get("employee")) {
-                $employeeRepo = $doctrine->getRepository(Employe::class);
-                $employee = $employeeRepo->find($request->request->get("employee"));
-                if($employee) {
-                    $leaveRight->setEmploye($employee);
+            if ($leaveRight->getStatus()) {
+                if ($leaveRight->getStatus() != "ACTIVE" && $leaveRight->getStatus() != "EXPIRED" ) {
+                    return new JsonResponse(["status" => "error", "message" => "verify your leave right status"]);
                 }
-            }
-            if ($request->request->get("leave_type")) {
-                $leaveTypeRepo = $doctrine->getRepository(LeaveType::class);
-                $leaveType = $leaveTypeRepo->find($request->request->get("leave_type"));
-                if($leaveType) {
-                    $leaveRight->setLeaveType($leaveType);
-                }
-
             }
             if ($form->isSubmitted()) {
                 $entityManager->persist($leaveRight);

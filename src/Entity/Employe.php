@@ -37,7 +37,6 @@ class Employe extends User
     #[ORM\JoinColumn(nullable:true, onDelete:"SET NULL")]
     private $poste;
 
-
     public function getNom(): ?string
     {
         return $this->nom;
@@ -144,7 +143,6 @@ class Employe extends User
 
         return $this;
     }
-
 
 
 }
