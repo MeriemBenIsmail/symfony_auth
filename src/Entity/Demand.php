@@ -2,11 +2,12 @@
 
 namespace App\Entity;
 
-use App\Repository\RequestRepository;
+use App\Repository\DemandRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Enum\StatusDemand;
 
-#[ORM\Entity(repositoryClass: RequestRepository::class)]
-class Request
+#[ORM\Entity(repositoryClass: DemandRepository::class)]
+class Demand
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -16,7 +17,8 @@ class Request
     #[ORM\Column(type: 'string', length: 255)]
     private $description;
 
-    #[ORM\Column(type: 'string', length: 255)]
+
+    #[Column(type: "string", enumType: StatusDemand::class)]
     private $status;
 
     #[ORM\Column(type: 'string', length: 255)]
@@ -37,6 +39,10 @@ class Request
     #[ORM\ManyToOne(targetEntity: Employe::class)]
     private $employe;
 
+    public function __construct()
+    {
+        $this->status = StatusDemand::WAITING;
+    }
     public function getId(): ?int
     {
         return $this->id;
