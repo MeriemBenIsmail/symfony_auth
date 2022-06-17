@@ -148,7 +148,7 @@ class EmployeController extends AbstractController
         }
     }
 
-    #[Route('/', name: 'employees.all')]
+    #[Route('/', name: 'employees.list')]
     public function getEmployees(ManagerRegistry $doctrine)
     {
         $repo = $doctrine->getRepository(Employe::class);

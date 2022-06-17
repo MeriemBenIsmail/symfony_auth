@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
-#[Route('/leave_rights')]
+#[Route('/leaveRights')]
 class LeaveRightController extends AbstractController
 {
     private $dateConvertor;
@@ -25,7 +25,7 @@ class LeaveRightController extends AbstractController
         $this->dateConvertor = $dateConvertor;
     }
 
-    #[Route('/add',name:'leave_rights.add')]
+    #[Route('/add',name:'leaveRights.add')]
     public function addLeaveRight(Request $request, ManagerRegistry $doctrine): Response
     {
         $entityManager = $doctrine->getManager();
@@ -45,12 +45,19 @@ class LeaveRightController extends AbstractController
         if ($request->request->get("employee")) {
             $employeeRepo = $doctrine->getRepository(Employe::class);
             $employee = $employeeRepo->find($request->request->get("employee"));
-            $leaveRight->setEmploye($employee);
+            if($employee) {
+                $leaveRight->setEmploye($employee);
+            }
+
         }
         if ($request->request->get("leaveType")) {
             $leaveTypeRepo = $doctrine->getRepository(LeaveType::class);
-            $leaveType = $leaveTypeRepo->find($request->request->get("leaveType"));
-            $leaveRight->setLeaveType($leaveType);
+
+            $leaveType = $leaveTypeRepo->find($request->request->get("leave_type"));
+            if($leaveType) {
+                $leaveRight->setLeaveType($leaveType);
+            }
+
         }
 
         if ($form->isSubmitted()) {
@@ -65,14 +72,66 @@ class LeaveRightController extends AbstractController
             }
         ]);
     }
-    #[Route('/delete/{id<\d+>}', name: 'leave_types.delete')]
+
+    #[Route('/update/{id<\d+>}', name: 'leaveRights.update')]
+    public function updateLeaveRights(LeaveRight $leaveRight = null, ManagerRegistry $doctrine, Request $request): JsonResponse
+    {
+        if ($leaveRight) {
+            $leaveRightRepo = $doctrine->getRepository(LeaveRight::class);
+            $entityManager = $doctrine->getManager();
+            $form = $this->createForm(LeaveRightType::class, $leaveRight);
+            $form->handleRequest($request);
+            $form->submit($request->request->all(), false);
+
+
+            if ($request->request->get("employee")) {
+                $employeeRepo = $doctrine->getRepository(Employe::class);
+                $employee = $employeeRepo->find($request->request->get("employee"));
+                if($employee) {
+                    $leaveRight->setEmploye($employee);
+                }
+            }
+            if ($request->request->get("leave_type")) {
+                $leaveTypeRepo = $doctrine->getRepository(LeaveType::class);
+                $leaveType = $leaveTypeRepo->find($request->request->get("leave_type"));
+                if($leaveType) {
+                    $leaveRight->setLeaveType($leaveType);
+                }
+
+            }
+            if ($form->isSubmitted()) {
+                $entityManager->persist($leaveRight);
+                $entityManager->flush();
+            }
+
+            return $this->json($leaveRight, Response::HTTP_OK, [], [
+                ObjectNormalizer::SKIP_NULL_VALUES => true,
+                ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                    return $object->getId();
+                }
+            ]);
+        } else {
+            return $this->json([
+                "message" => "error no group with this id", 200
+            ]);
+
+        }
+    }
+
+    #[Route('/delete/{id<\d+>}', name: 'leaveRights.delete')]
     public function deleteLeaveRight(ManagerRegistry $doctrine, LeaveRight $leaveRight = null): Response
     {
         if ($leaveRight) {
             $entityManager = $doctrine->getManager();
             $entityManager->remove($leaveRight);
             $entityManager->flush();
-            return $this->json($leaveRight);
+            return $this->json($leaveRight, Response::HTTP_OK, [], [
+                ObjectNormalizer::SKIP_NULL_VALUES => true,
+                ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                    return $object->getId();
+                }
+            ]);
+
         } else {
             return new JsonResponse([
                 "message" => "error",
@@ -80,21 +139,31 @@ class LeaveRightController extends AbstractController
         }
     }
 
-    #[Route('/', name: 'leave_rights.list')]
+    #[Route('/', name: 'leaveRights.list')]
     public function getLeaveRights(Request $request, ManagerRegistry $doctrine): Response
     {
         $leaveRightRepo = $doctrine->getRepository(LeaveRight::class);
         $leaveRights = $leaveRightRepo->findAll();
-        return $this->json($leaveRights);
+        return $this->json($leaveRights, Response::HTTP_OK, [], [
+            ObjectNormalizer::SKIP_NULL_VALUES => true,
+            ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                return $object->getId();
+            }
+        ]);
     }
 
-    #[Route('/{id<\d+>}', name: 'leave_rights.get')]
+    #[Route('/{id<\d+>}', name: 'leaveRights.get')]
     public function getLeaveRight(int $id, ManagerRegistry $doctrine): JsonResponse
     {
         $leaveRightRepo = $doctrine->getRepository(LeaveRight::class);
         $leaveRight = $leaveRightRepo->find($id);
         if ($leaveRight) {
-            return $this->json($leaveRight);
+            return $this->json($leaveRight, Response::HTTP_OK, [], [
+                ObjectNormalizer::SKIP_NULL_VALUES => true,
+                ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                    return $object->getId();
+                }
+            ]);
         } else {
             return new JsonResponse(["message" => "error not found"], 401);
         }

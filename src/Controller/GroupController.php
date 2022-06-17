@@ -20,7 +20,7 @@ class GroupController extends AbstractController
 {
     private $json;
 
-    #[Route('/add', name: 'group.add')]
+    #[Route('/add', name: 'groups.add')]
     public function addGroup(ManagerRegistry $doctrine, Request $request): JsonResponse
     {
         $entityManager = $doctrine->getManager();
@@ -57,7 +57,7 @@ class GroupController extends AbstractController
         ]);
     }
 
-    #[Route('/addTo', name: 'group.addUser')]
+    #[Route('/addTo', name: 'groups.addUser')]
     public function addToGroup(ManagerRegistry $doctrine, Request $request): JsonResponse
     {
         $entityManager = $doctrine->getManager();
@@ -76,7 +76,7 @@ class GroupController extends AbstractController
         ]);
     }
 
-    #[Route('/removeFrom', name: 'group.removeUser')]
+    #[Route('/removeFrom', name: 'groups.removeUser')]
     public function removeFromGroup(ManagerRegistry $doctrine, Request $request): JsonResponse
     {
         $entityManager = $doctrine->getManager();
@@ -95,7 +95,7 @@ class GroupController extends AbstractController
         ]);
     }
 
-    #[Route('/update/{id<\d+>}', name: 'group.update')]
+    #[Route('/update/{id<\d+>}', name: 'groups.update')]
     public function updateGroup(Group $group = null, ManagerRegistry $doctrine, Request $request): JsonResponse
     {
         if ($group) {
@@ -161,7 +161,7 @@ class GroupController extends AbstractController
         }
     }
 
-    #[Route('/', name: 'group.list')]
+    #[Route('/', name: 'groups.list')]
     public function getAll(ManagerRegistry $doctrine): JsonResponse
     {
         $groupRepo = $doctrine->getRepository(Group::class);
@@ -174,7 +174,7 @@ class GroupController extends AbstractController
         ]);
     }
 
-    #[Route('/{id<\d+>}', name: 'group.get')]
+    #[Route('/{id<\d+>}', name: 'groups.get')]
     public function getGroup(ManagerRegistry $doctrine, Group $group = null): JsonResponse
     {
         if ($group) {
