@@ -40,7 +40,7 @@ class LeaveRightController extends AbstractController
 
         $leaveRight->setStartValidityDate($newDateStart);
         $leaveRight->setEndValidityDate($newDateEnd);
-        $leaveRight->setStatus('valid');
+        $leaveRight->setStatus(LeaveRight::ACTIVE);
 
         if ($request->request->get("employee")) {
             $employeeRepo = $doctrine->getRepository(Employe::class);
@@ -50,8 +50,9 @@ class LeaveRightController extends AbstractController
             }
 
         }
-        if ($request->request->get("leave_type")) {
+        if ($request->request->get("leaveType")) {
             $leaveTypeRepo = $doctrine->getRepository(LeaveType::class);
+
             $leaveType = $leaveTypeRepo->find($request->request->get("leave_type"));
             if($leaveType) {
                 $leaveRight->setLeaveType($leaveType);
