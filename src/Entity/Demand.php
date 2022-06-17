@@ -2,12 +2,16 @@
 
 namespace App\Entity;
 
-use App\Repository\RequestRepository;
+
+use App\Repository\DemandRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: RequestRepository::class)]
+#[ORM\Entity(repositoryClass: DemandRepository::class)]
 class Demand
 {
+    const WAITING = "WAITING";
+    const CONFIRMED = "CONFIRMED";
+    const DECLINED = "DECLINED";
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
@@ -16,10 +20,11 @@ class Demand
     #[ORM\Column(type: 'string', length: 255)]
     private $description;
 
+
     #[ORM\Column(type: 'string', length: 255)]
     private $status;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(type: 'string', length: 255, nullable: false)]
     private $type;
 
     #[ORM\Column(type: 'string', length: 255)]
@@ -34,8 +39,10 @@ class Demand
     #[ORM\ManyToOne(targetEntity: LeaveType::class)]
     private $leaveType;
 
+
     #[ORM\ManyToOne(targetEntity: Employe::class)]
     private $employe;
+
 
     public function getId(): ?int
     {

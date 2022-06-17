@@ -1,10 +1,8 @@
 <?php
 
 namespace App\Entity;
-
 use App\Repository\EmployeRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints\Date;
 
 #[ORM\Entity(repositoryClass: EmployeRepository::class)]
 class Employe extends User
