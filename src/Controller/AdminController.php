@@ -4,9 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Group;
 use App\Entity\User;
-use App\Entity\UserRole;
 use App\Form\AdminType;
-use App\Service\AuthService;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,7 +15,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 // only superadmin can access the routes of this controller
-#[Route('/api/admins')]
+#[Route('/admins')]
 class AdminController extends AbstractController
 {
     #[Route('/add', name: 'admin.add')]
@@ -163,7 +161,7 @@ class AdminController extends AbstractController
     public function getAdmins(ManagerRegistry $doctrine)
     {
         $repo = $doctrine->getRepository(User::class);
-        $admins = $repo->findBy(['super' => 0]);
+        $admins = $repo->findBy(['super' => 0,'super'=>1]);
         return $this->json($admins, Response::HTTP_OK, [], [
             ObjectNormalizer::SKIP_NULL_VALUES => true,
             ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {

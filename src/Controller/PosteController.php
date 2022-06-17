@@ -19,11 +19,6 @@ class PosteController extends AbstractController
 {
 
     #[Route('/add', name: 'postes.add')]
-    /**
-     * Require ROLE_SUPER_ADMIN only for this action
-     *
-     * @IsGranted("ROLE_POSTS")
-     */
     #[Security("is_granted('ROLE_POSTS') or is_granted('ROLE_POSTS_CREATE')")]
     public function addPoste(Request $request, ManagerRegistry $doctrine): Response
     {
