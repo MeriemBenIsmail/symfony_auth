@@ -101,7 +101,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 }
             }
         }
-        return array_unique($rolesUnion);
+        if ($rolesUnion){
+
+            return array_unique($rolesUnion);
+        }
+        return  [];
     }
 
     public function setRoles(array $roles): self
