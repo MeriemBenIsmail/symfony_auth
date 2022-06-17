@@ -6,7 +6,8 @@ use App\Repository\DemandRepository;
 use Doctrine\ORM\Mapping as ORM;
 use App\Enum\StatusDemand;
 
-#[ORM\Entity(repositoryClass: DemandRepository::class)]
+
+#[ORM\Entity(repositoryClass: RequestRepository::class)]
 class Demand
 {
     #[ORM\Id]

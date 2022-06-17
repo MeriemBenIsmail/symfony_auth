@@ -2,27 +2,26 @@
 
 namespace App\Form;
 
-use App\Entity\User;
+use App\Entity\LeaveType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class AdminType extends AbstractType
+class LeaveTypeF extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('email')
-            ->add('super')
-            ->add('password')
-            ->add('groups')
+            ->add('description')
+            ->add('annual')
+            ->add('validityDuration')
         ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => User::class,
+            'data_class' => LeaveType::class,
         ]);
     }
 }
