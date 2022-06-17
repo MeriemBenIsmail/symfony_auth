@@ -12,10 +12,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
-#[Route('/leave_types')]
+#[Route('/leaveTypes')]
 class LeaveTypeController extends AbstractController
 {
-    #[Route('/add', name: 'leave_types.add')]
+    #[Route('/add', name: 'leaveTypes.add')]
     public function addLeaveType(Request $request, ManagerRegistry $doctrine): Response
     {
         $entityManager = $doctrine->getManager();
@@ -31,7 +31,7 @@ class LeaveTypeController extends AbstractController
         return $this->json($leaveType);
     }
 
-    #[Route('/delete/{id<\d+>}', name: 'leave_types.delete')]
+    #[Route('/delete/{id<\d+>}', name: 'leaveTypes.delete')]
     public function deleteLeaveType(ManagerRegistry $doctrine, LeaveType $leaveType = null): Response
     {
         if ($leaveType) {
@@ -46,7 +46,7 @@ class LeaveTypeController extends AbstractController
         }
     }
 
-    #[Route('/update/{id<\d+>}', name: 'leave_types.update')]
+    #[Route('/update/{id<\d+>}', name: 'leaveTypes.update')]
     public function updateLeaveType(LeaveType $leaveType = null, Request $request, ManagerRegistry $doctrine): Response
     {
         if ($leaveType) {
@@ -65,7 +65,7 @@ class LeaveTypeController extends AbstractController
             "data" => "No such leave "], 200);
     }
 
-    #[Route('/', name: 'leave_types.list')]
+    #[Route('/', name: 'leaveTypes.list')]
     public function getLeaveTypes(Request $request, ManagerRegistry $doctrine): Response
     {
         $leaveTypeRepo = $doctrine->getRepository(LeaveType::class);
@@ -73,7 +73,7 @@ class LeaveTypeController extends AbstractController
         return $this->json($leaveTypes);
     }
 
-    #[Route('/{id<\d+>}', name: 'leave_types.get')]
+    #[Route('/{id<\d+>}', name: 'leaveTypes.get')]
     public function getLeaveType(int $id, ManagerRegistry $doctrine): JsonResponse
     {
         $leaveTypeRepo = $doctrine->getRepository(LeaveType::class);
