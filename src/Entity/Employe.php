@@ -39,6 +39,9 @@ class Employe extends User
     #[ORM\JoinColumn(nullable:true, onDelete:"SET NULL")]
     private $poste;
 
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private $deletedAt;
+
 
 
     public function getNom(): ?string
@@ -144,6 +147,18 @@ class Employe extends User
     public function setPoste(?Poste $poste): self
     {
         $this->poste = $poste;
+
+        return $this;
+    }
+
+    public function getDeletedAt(): ?\DateTimeInterface
+    {
+        return $this->deletedAt;
+    }
+
+    public function setDeletedAt(?\DateTimeInterface $deletedAt): self
+    {
+        $this->deletedAt = $deletedAt;
 
         return $this;
     }
