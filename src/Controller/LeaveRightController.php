@@ -2,17 +2,69 @@
 
 namespace App\Controller;
 
+use App\Entity\Employe;
 use App\Entity\LeaveRight;
+use App\Entity\LeaveType;
+use App\Form\LeaveRightType;
+use App\Service\DateConvertorService;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 #[Route('/leave_rights')]
 class LeaveRightController extends AbstractController
 {
+    private $dateConvertor;
+
+    public function __construct(DateConvertorService $dateConvertor)
+    {
+        $this->dateConvertor = $dateConvertor;
+    }
+
+    #[Route('/add',name:'leave_rights.add')]
+    public function addLeaveRight(Request $request, ManagerRegistry $doctrine): Response
+    {
+        $entityManager = $doctrine->getManager();
+        $leaveRight = new LeaveRight();
+        $form = $this->createForm(LeaveRightType::class, $leaveRight);
+
+        $newDateStart = $this->dateConvertor->convertStringToDateTime($request->request->get('startValidityDate'));
+        $newDateEnd=$this->dateConvertor->convertStringToDateTime($request->request->get('endValidityDate'));
+
+        $form->handleRequest($request);
+        $form->submit($request->request->all(), false);
+
+        $leaveRight->setStartValidityDate($newDateStart);
+        $leaveRight->setEndValidityDate($newDateEnd);
+        $leaveRight->setStatus('valid');
+
+        if ($request->request->get("employee")) {
+            $employeeRepo = $doctrine->getRepository(Employe::class);
+            $employee = $employeeRepo->find($request->request->get("employee"));
+            $leaveRight->setEmploye($employee);
+        }
+        if ($request->request->get("leave_type")) {
+            $leaveTypeRepo = $doctrine->getRepository(LeaveType::class);
+            $leaveType = $leaveTypeRepo->find($request->request->get("leave_type"));
+            $leaveRight->setLeaveType($leaveType);
+        }
+
+        if ($form->isSubmitted()) {
+            $entityManager->persist($leaveRight);
+            $entityManager->flush();
+        }
+
+        return $this->json($leaveRight, Response::HTTP_OK, [], [
+            ObjectNormalizer::SKIP_NULL_VALUES => true,
+            ObjectNormalizer::CIRCULAR_REFERENCE_HANDLER => function ($object) {
+                return $object->getId();
+            }
+        ]);
+    }
     #[Route('/delete/{id<\d+>}', name: 'leave_types.delete')]
     public function deleteLeaveRight(ManagerRegistry $doctrine, LeaveRight $leaveRight = null): Response
     {

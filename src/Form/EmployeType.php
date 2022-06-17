@@ -22,7 +22,6 @@ class EmployeType extends AbstractType
             ->add('telPro')
             ->add('telPerso')
             ->add('dateEmbauche')
-            ->add('userRoles')
             ->add('groups')
             ->add('poste')
             ->add('contactUrgence')

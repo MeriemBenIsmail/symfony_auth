@@ -65,21 +65,6 @@ class AdminController extends AbstractController
         ]);
     }
 
-    #[Route('/addTest', name: 'admins.addTest')]
-    public function addAdminTest(ManagerRegistry $doctrine, Request $request, UserPasswordHasherInterface $passwordHasher, AuthService $authService): JsonResponse
-    {
-        $user = $this->getUser();
-
-        if ($authService->hasRole($user, 'create_admin')) {
-
-            return $this->json("hii");
-
-        }
-        return $this->json(['error' => "you don't have access to this resource"], 401);
-
-
-    }
-
     #[Route('/update/{id}', name: 'admins.update')]
     public function updateAdmin(User $user = null, Request $request, ManagerRegistry $doctrine): Response
     {
