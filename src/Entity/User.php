@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
@@ -20,7 +21,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\GeneratedValue(strategy: "AUTO")]
     #[ORM\Column(type: 'integer')]
     private $id;
-
+    #[Assert\Email(message: "The email '{{ value }}' is not a valid email.")]
     #[ORM\Column(type: 'string', length: 180, unique: true)]
     protected $email;
 
@@ -29,7 +30,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: 'json')]
     private $roles = [];
-
+    #[SecurityAssert\UserPassword(message: "Wrong value for your current password")]
     #[ORM\Column(type: 'string')]
     protected $password;
 
@@ -101,11 +102,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 }
             }
         }
-        if ($rolesUnion){
+        if ($rolesUnion) {
 
             return array_unique($rolesUnion);
         }
-        return  [];
+        return [];
     }
 
     public function setRoles(array $roles): self
@@ -171,7 +172,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->groups->contains($group)) {
             $this->groups[] = $group;
-                $group->addUser($this);
+            $group->addUser($this);
 
         }
 

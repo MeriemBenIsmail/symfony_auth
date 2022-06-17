@@ -2,26 +2,26 @@
 
 namespace App\Repository;
 
-use App\Entity\Request;
+use App\Entity\Demand;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends ServiceEntityRepository<Request>
  *
- * @method Request|null find($id, $lockMode = null, $lockVersion = null)
- * @method Request|null findOneBy(array $criteria, array $orderBy = null)
- * @method Request[]    findAll()
- * @method Request[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Demand|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Demand|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Demand[]    findAll()
+ * @method Demand[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class RequestRepository extends ServiceEntityRepository
+class DemandRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Request::class);
+        parent::__construct($registry, Demand::class);
     }
 
-    public function add(Request $entity, bool $flush = false): void
+    public function add(Demand $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
 
@@ -30,7 +30,7 @@ class RequestRepository extends ServiceEntityRepository
         }
     }
 
-    public function remove(Request $entity, bool $flush = false): void
+    public function remove(Demand $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
 
@@ -40,7 +40,7 @@ class RequestRepository extends ServiceEntityRepository
     }
 
 //    /**
-//     * @return Request[] Returns an array of Request objects
+//     * @return Demand[] Returns an array of Request objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -54,7 +54,7 @@ class RequestRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Request
+//    public function findOneBySomeField($value): ?Demand
 //    {
 //        return $this->createQueryBuilder('r')
 //            ->andWhere('r.exampleField = :val')
