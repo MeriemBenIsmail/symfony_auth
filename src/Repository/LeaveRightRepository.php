@@ -39,6 +39,26 @@ class LeaveRightRepository extends ServiceEntityRepository
         }
     }
 
+    /**
+     * @return LeaveRight[] Returns an array of LeaveRight objects
+     */
+    public function findCurrentYearlyRights(): array
+    {
+        $currentYear = date("Y");
+        $currentYear=$currentYear."%";
+        $qb = $this->createQueryBuilder('l')
+            ->join('l.leaveType','t')
+            ->where("l.startValidityDate LIKE :year ")
+            ->andWhere('t.annual = true')
+            ->andWhere('l.status = ACTIVE')
+            ->setParameter('year', $currentYear);
+
+
+        $query = $qb->getQuery();
+
+        return $query->execute();
+    }
+
 //    /**
 //     * @return LeaveRight[] Returns an array of LeaveRight objects
 //     */

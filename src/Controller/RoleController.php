@@ -2,16 +2,13 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
-use App\Entity\UserRole;
-use App\Form\UserRoleType;
-use App\Service\AuthService;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Role\Role;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 
@@ -22,8 +19,8 @@ class RoleController extends AbstractController
     public function addRole(Request $request, ManagerRegistry $doctrine): Response
     {
         $entityManager = $doctrine->getManager();
-        $userRoleRepo = $doctrine->getRepository(UserRole::class);
-        $userRole = new UserRole();
+        $userRoleRepo = $doctrine->getRepository(Role::class);
+        $userRole = new Role();
         $form = $this->createForm(UserRoleType::class, $userRole);
         $form->handleRequest($request);
         $form->submit($request->request->all(), false);;

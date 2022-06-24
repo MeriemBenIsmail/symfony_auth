@@ -25,7 +25,6 @@ class GroupController extends AbstractController
     {
         $entityManager = $doctrine->getManager();
         $userRepo = $doctrine->getRepository(User::class);
-        $userRoleRepo = $doctrine->getRepository(UserRole::class);
         $group = new Group();
         $form = $this->createForm(GroupType::class, $group);
         $form->handleRequest($request);
